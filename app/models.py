@@ -10,6 +10,7 @@ class Usuario(SQLModel, table=True):  #table=true para o SQLModel confirmar que 
     telefone: str
     email: str
     turma_modulo: str
+    senha: str
 
 class Item(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True) # isso diz: "o id é opcional no momento de criar, mas o banco vai preencher automaticamente"
@@ -33,6 +34,13 @@ class Chamado (SQLModel, table=True):
     rm_usuario: int = Field(foreign_key="usuario.rm")
     id_item: Optional[int] = Field(default=None, foreign_key="item.id")
 
+class Secretaria(SQLModel, table=True):
+    cpf: str = Field(primary_key=True)
+    nome: str
+    email: str
+    telefone: str
+    senha: str
+
 class UsuarioUpdate(SQLModel):
     nome: Optional[str] = None
     telefone: Optional[str] = None
@@ -46,3 +54,22 @@ class ItemUpdate(SQLModel):
     tamanho: Optional[str] = None
     local_encontrado: Optional[str] = None
     data_entrada: Optional[date] = None
+
+class ChamadoUpdate(SQLModel):
+    tipo: Optional[str] = None
+    cor: Optional[str] = None
+    marca: Optional[str] = None
+    criterio_validacao: Optional[str] = None
+    data_perda: Optional[date] = None
+    local_perda: Optional[str] = None
+    status: Optional[str] = None
+    rm_usuario: Optional[int] = None
+    id_item: Optional[int] = None
+
+class LoginUsuario(SQLModel):
+    rm: int
+    senha: str
+
+class LoginSecretaria(SQLModel):
+    cpf: str
+    senha: str

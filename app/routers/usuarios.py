@@ -2,15 +2,19 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.models import Usuario, UsuarioUpdate
 from app.database import get_session
 from sqlmodel import Session, select
+from app.auth import hash_senha
+
+
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
 @router.post("/", status_code = 201) # cria usuario 
 def cadastrar_usuario(usuario: Usuario, session: Session = Depends(get_session)):
+    usuario.senha = hash_senha(usuario.senha) # aqui ele chama a função hash_senha para criptografar a senha do usuario, ou seja, ele pega a senha em texto plano e transforma em uma versão criptografada, ou seja, ele protege a senha do usuario para que não fique exposta no banco de dados
     session.add(usuario) # adiciona o usuario na sessão, ou seja, prepara para salvar no banco de dados
     session.commit() # aqui ele salva no banco de dados, ou seja, é a partir daqui que o usuario é criado de fato
     session.refresh(usuario) # aqui ele atualiza o objeto usuario com os dados do banco de dados, ou seja, se o banco de dados gerar um id automaticamente, ele vai atualizar o objeto usuario com esse id
-    return usuario
+    return usuario  
 
 @router.get("/")
 def listar_usuarios(session: Session = Depends(get_session)):
