@@ -3,41 +3,115 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apetec - Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Anonymous+Pro&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style/style.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2">
-
-  <title>Document</title>
 </head>
 <body>
-<!-- Fundo animado -->
+
+<!-- Fundo animado original -->
 <div class="background">
-   <span></span>
-   <span></span>
-   <span></span>
-   <span></span>
-   <span></span>
-   <span></span>
-   <span></span>
-   <span></span>
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
 </div>
 
-<!-- Formulário de login -->
-  <div class="login-container">
-  <p class="cursor typewriter-animation">Bem-vindo a <span class="apetec">APETEC</span></p>
-  <p class="p">Faça seu login para continuar</p>
-  <br>
-    <form>
-      <label for="username">Nome de usuário:</label>
-      <br>
-      <input type="text" id="username" name="username" required placeholder="Digite seu nome RM">
-      <br>
-      <label for="password">Senha:</label>
-      <br>
-      <input type="password" id="password" name="password" required placeholder="Digite sua senha">
-      <br>
-      <button type="submit" class="Entrar">Entrar</button>
-      <button type="button" class="Registrar" onclick="window.location.href='register.html'">Registrar</button>
-    </form>
+<!-- Formulário -->
+<div class="login-container">
+
+  <div class="typewriter-wrap">Bem-vindo à <span class="apetec">APETEC</span></div>
+  <p class="titulo">Sistema de Achados e Perdidos Escolar</p>
+  <p class="subtitulo">Faça seu login para continuar</p>
+
+  <div class="tipo-selector">
+    <button class="tipo-btn ativo" id="btn-aluno" onclick="selecionarTipo('aluno')">Aluno</button>
+    <button class="tipo-btn" id="btn-secretaria" onclick="selecionarTipo('secretaria')">Secretaria</button>
   </div>
+
+  <div class="form-grupo" id="grupo-rm">
+    <label for="input-rm">RM</label>
+    <input type="number" id="input-rm" placeholder="Digite seu RM">
+  </div>
+
+  <div class="form-grupo" id="grupo-cpf" style="display:none">
+    <label for="input-cpf">CPF</label>
+    <input type="text" id="input-cpf" placeholder="000.000.000-00">
+  </div>
+
+  <div class="form-grupo">
+    <label for="input-senha">Senha</label>
+    <input type="password" id="input-senha" placeholder="••••••••">
+  </div>
+
+  <div class="msg-erro" id="msg-erro"></div>
+
+  <div class="btns">
+    <button class="Entrar" onclick="fazerLogin()">Entrar</button>
+    <button class="Registrar" onclick="window.location.href='register.html'">Registrar</button>
+  </div>
+
+</div>
+
+<p class="rodape">Apetec · Sistema de Achados e Perdidos Escolar</p>
+
+<script>
+  let tipoAtual = 'aluno';
+
+  function selecionarTipo(tipo) {
+    tipoAtual = tipo;
+    document.getElementById('btn-aluno').classList.toggle('ativo', tipo === 'aluno');
+    document.getElementById('btn-secretaria').classList.toggle('ativo', tipo === 'secretaria');
+    document.getElementById('grupo-rm').style.display  = tipo === 'aluno'      ? '' : 'none';
+    document.getElementById('grupo-cpf').style.display = tipo === 'secretaria' ? '' : 'none';
+    document.getElementById('msg-erro').style.display  = 'none';
+    document.getElementById('grupo-cpf').style.opacity = '1';
+    document.getElementById('grupo-rm').style.opacity = '1';
+  }
+
+  async function fazerLogin() {
+    const senha = document.getElementById('input-senha').value.trim();
+    const erro  = document.getElementById('msg-erro');
+    erro.style.display = 'none';
+
+    let url, body;
+
+    if (tipoAtual === 'aluno') {
+      const rm = document.getElementById('input-rm').value.trim();
+      if (!rm || !senha) { mostrarErro('Preencha RM e senha.'); return; }
+      url  = 'http://localhost:8000/auth/login/usuario';
+      body = { rm: parseInt(rm), senha };
+    } else {
+      const cpf = document.getElementById('input-cpf').value.trim();
+      if (!cpf || !senha) { mostrarErro('Preencha CPF e senha.'); return; }
+      url  = 'http://localhost:8000/auth/login/secretaria';
+      body = { cpf, senha };
+    }
+
+    try {
+      const res  = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) { mostrarErro('Credenciais inválidas. Tente novamente.'); return; }
+
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('tipo_usuario', tipoAtual);
+      window.location.href = 'dashboard.html';
+    } catch {
+      mostrarErro('Erro ao conectar com o servidor.');
+    }
+  }
+
+  function mostrarErro(msg) {
+    const el = document.getElementById('msg-erro');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
+</script>
+
 </body>
 </html>

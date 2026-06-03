@@ -1,15 +1,27 @@
 from typing import Optional #define se o campo é obrigatório ou não
 from sqlmodel import SQLModel, Field #field define a regra do campo, ou seja, se ele é pk, valor padrão, tamanho minimo
+from enum import Enum #enum é para criar um tipo de dado com opções pré-definidas
+from pydantic import EmailStr #valida se o campo é um email válido
 from datetime import date # importa a date
 
+
+
+class CargoEnum(str, Enum):
+    aluno         = "aluno"
+    professor     = "professor"
+    administrativo = "administrativo"
+    cozinha       = "cozinha"
+    limpeza       = "limpeza"
+    seguranca     = "segurança"
 
 #classe para criar a tabela de usuarios na database
 class Usuario(SQLModel, table=True):  #table=true para o SQLModel confirmar que é uma tabela realmente e não um schema de validação
     rm: int = Field(primary_key=True) 
     nome: str 
     telefone: str
-    email: str
+    email: EmailStr
     turma_modulo: str
+    cargo: CargoEnum
     senha: str
 
 class Item(SQLModel, table=True):
@@ -39,6 +51,15 @@ class Secretaria(SQLModel, table=True):
     nome: str
     email: str
     telefone: str
+    senha: str
+
+class UsuarioCreate(SQLModel):
+    rm: int
+    nome: str
+    telefone: str
+    email: EmailStr
+    turma_modulo: str
+    cargo: CargoEnum
     senha: str
 
 class UsuarioUpdate(SQLModel):

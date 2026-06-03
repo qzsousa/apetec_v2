@@ -1,191 +1,251 @@
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-size: 22px;
-    font-family: 'Crimson Pro', serif;
-}
-.login-container {
-    color:white;
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    padding: 80px 220px;
-    border-radius: 5px;
-    backdrop-filter: blur(120px); /* Aplica o desfoque ao fundo */
-    border: 1px solid rgba(255, 255, 255, 0.3); /* Borda de vidro */
-}
-
-.Registrar {
-    background-color: transparent;
-    color: white;
-    align-items: right;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px 20px;
-    margin-top: 10px;
-    cursor: pointer;
-}
-
-.Entrar {
-    background-color: transparent;
-    color: white;
-    align-items: left;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px 20px;
-    margin-top: 10px;
-    cursor: pointer;
-}
-
-/* Estilos para os campos de entrada e botão */
-input[type="text"], input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: transparent;
-    color: white;
-}
-.apetec {
-    color: #f0c31f;
-    font-weight: bold;
-}
-/* Google Fonts */
-@import url(https://fonts.googleapis.com/css?family=Anonymous+Pro);
-
-/* Cursor */
-.cursor{
-    position: relative;
-    width: 24em;
-    margin: 0 auto;
-    border-right: 2px solid rgba(255,255,255,.75);
-    font-size: 30px;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    transform: translateY(-50%);    
-}
-/* Animation */
-.typewriter-animation {
-  animation: 
-    typewriter 3.2s steps(50) 1s 1 normal both, 
-    blinkingCursor 500ms steps(50) infinite normal;
-}
-@keyframes typewriter {
-  from { width: 0; }
-  to { width: 100%; }
-}
-@keyframes blinkingCursor{
-  from { border-right-color: rgba(255,255,255,.75); }
-  to { border-right-color: transparent; }
-}
-
-/* Define a animação do fundo do site */
-@keyframes move {
-    100% {
-        transform: translate3d(0, 0, 1px) rotate(360deg);
+    /* ── Fundo animado (original mantido) ── */
+    @keyframes move {
+      100% { transform: translate3d(0, 0, 1px) rotate(360deg); }
     }
-}
 
-.background {
-    z-index: -1;
-    position: fixed;
-    width: 100vw;
-    height: 100vh;
-    top: 0;
-    left: 0;
-    background: #570000;
-    overflow: hidden;
-}
+    .background {
+      z-index: -1;
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0; left: 0;
+      background: #570000;
+      overflow: hidden;
+    }
 
-.background span {
+    .background span {
+      width: 25vmin;
+      height: 25vmin;
+      border-radius: 50%;
+      backface-visibility: hidden;
+      position: absolute;
+      animation: move linear infinite;
+    }
 
-    width: 25vmin;
-    height: 25vmin;
-    border-radius: 25vmin;
-    backface-visibility: hidden;
-    position: absolute;
-    animation: move;
-    animation-duration: 45;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-}
+    .background span:nth-child(1) { color:#ebbc14; top:65%; left:32%; animation-duration:20s; animation-delay:-2s;  transform-origin: 8vw  -3vh; box-shadow: 50vmin 0 6.6vmin currentColor; }
+    .background span:nth-child(2) { color:#ebbc14; top:84%; left:48%; animation-duration:49s; animation-delay:-9s;  transform-origin:-8vw  -3vh; box-shadow: 50vmin 0 6.5vmin currentColor; }
+    .background span:nth-child(3) { color:#ebbc14; top:41%; left:42%; animation-duration:11s; animation-delay:-22s; transform-origin:-17vw  8vh; box-shadow:-50vmin 0 6.5vmin currentColor; }
+    .background span:nth-child(4) { color:#ebbc14; top:92%; left:63%; animation-duration:24s; animation-delay:-42s; transform-origin: 12vw -19vh; box-shadow:-50vmin 0 6.7vmin currentColor; }
+    .background span:nth-child(5) { color:#ebbc14; top:34%; left: 8%; animation-duration:46s; animation-delay:-15s; transform-origin: 17vw -10vh; box-shadow: 50vmin 0 6.6vmin currentColor; }
+    .background span:nth-child(6) { color:#ebbc14; top:65%; left:97%; animation-duration: 8s; animation-delay:-11s; transform-origin: -7vw  -6vh; box-shadow: 50vmin 0 6.6vmin currentColor; }
+    .background span:nth-child(7) { color:#ebbc14; top:51%; left:96%; animation-duration:44s; animation-delay:-28s; transform-origin: 21vw -16vh; box-shadow:-50vmin 0 7.0vmin currentColor; }
+    .background span:nth-child(8) { color:#ebbc14; top: 1%; left:52%; animation-duration: 7s; animation-delay:-22s; transform-origin:-14vw   4vh; box-shadow:-50vmin 0 7.0vmin currentColor; }
 
+    /* ── Layout ── */
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Crimson Pro', serif;
+      font-size: 20px;
+      color: white;
+    }
 
-.background span:nth-child(0) {
-    color: #ebbc14;
-    top: 65%;
-    left: 32%;
-    animation-duration: 20s;
-    animation-delay: -2s;
-    transform-origin: 8vw -3vh;
-    box-shadow: 50vmin 0 6.64795459763602vmin currentColor;
-}
-.background span:nth-child(1) {
-    color: #ebbc14;
-    top: 84%;
-    left: 48%;
-    animation-duration: 49s;
-    animation-delay: -9s;
-    transform-origin: -8vw -3vh;
-    box-shadow: 50vmin 0 6.56827459369005vmin currentColor;
-}
-.background span:nth-child(2) {
-    color: #ebbc14;
-    top: 41%;
-    left: 42%;
-    animation-duration: 11s;
-    animation-delay: -22s;
-    transform-origin: -17vw 8vh;
-    box-shadow: -50vmin 0 6.582899440555923vmin currentColor;
-}
-.background span:nth-child(3) {
-    color: #ebbc14;
-    top: 92%;
-    left: 63%;
-    animation-duration: 24s;
-    animation-delay: -42s;
-    transform-origin: 12vw -19vh;
-    box-shadow: -50vmin 0 6.729506750398684vmin currentColor;
-}
-.background span:nth-child(4) {
-    color: #ebbc14;
-    top: 34%;
-    left: 8%;
-    animation-duration: 46s;
-    animation-delay: -15s;
-    transform-origin: 17vw -10vh;
-    box-shadow: 50vmin 0 6.61333631438075vmin currentColor;
-}
-.background span:nth-child(5) {
-    color: #ebbc14;
-    top: 65%;
-    left: 97%;
-    animation-duration: 8s;
-    animation-delay: -11s;
-    transform-origin: -7vw -6vh;
-    box-shadow: 50vmin 0 6.687183300056045vmin currentColor;
-}
-.background span:nth-child(6) {
-    color: #ebbc14;
-    top: 51%;
-    left: 96%;
-    animation-duration: 44s;
-    animation-delay: -28s;
-    transform-origin: 21vw -16vh;
-    box-shadow: -50vmin 0 7.027164758917124vmin currentColor;
-}
-.background span:nth-child(7) {
-    color: #ebbc14;
-    top: 1%;
-    left: 52%;
-    animation-duration: 7s;
-    animation-delay: -22s;
-    transform-origin: -14vw 4vh;
-    box-shadow: -50vmin 0 7.010716968347578vmin currentColor;
-}
+    /* ── Card ── */
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      width: min(480px, 90vw);
+      padding: 52px 56px;
+      border-radius: 8px;
+      backdrop-filter: blur(120px);
+      -webkit-backdrop-filter: blur(120px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.04);
+      animation: fadeUp 0.7s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Efeito de digitação ── */
+    .typewriter-wrap {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid rgba(255,255,255,0.75);
+      width: 0;
+      animation:
+        typewriter 2.8s steps(30) 0.4s forwards,
+        blinkCursor 600ms steps(1) infinite;
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    @keyframes typewriter {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+
+    @keyframes blinkCursor {
+      0%, 100% { border-right-color: rgba(255,255,255,0.75); }
+      50%       { border-right-color: transparent; }
+    }
+
+    .apetec {
+      color: #f0c31f;
+      font-weight: 700;
+    }
+
+    .titulo {
+      font-size: 18px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 12px;
+      opacity: 0;
+      animation: surgir 0.5s ease 3.3s forwards;
+    }
+    .subtitulo   {
+      font-size: 15px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: surgir 0.5s ease 3.4s forwards;
+    }
+
+    @keyframes surgir {
+      to { opacity: 1; }
+    }
+
+    /* ── Seletor de perfil ── */
+    .tipo-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 22px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      padding: 4px;
+      opacity: 0;
+      animation: surgir 0.5s ease 3.5s forwards;
+    }
+
+    .tipo-btn {
+      padding: 8px;
+      border: none;
+      background: transparent;
+      border-radius: 4px;
+      font-family: 'Crimson Pro', serif;
+      font-size: 16px;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tipo-btn.ativo {
+      background: rgba(240,195,31,0.18);
+      color: #f0c31f;
+      border: 1px solid rgba(240,195,31,0.35);
+    }
+
+    /* ── Formulário ── */
+    .form-grupo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 14px;
+      opacity: 0;
+      animation: surgir 0.5s ease 3.6s both;
+    }
+
+    .form-grupo label {
+      font-size: 14px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.65);
+      letter-spacing: 0.04em;
+    }
+
+    .form-grupo input {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 5px;
+      font-family: 'Crimson Pro', serif;
+      font-size: 17px;
+      color: white;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .form-grupo input::placeholder { color: rgba(255,255,255,0.3); }
+
+    .form-grupo input:focus {
+      border-color: rgba(240,195,31,0.6);
+      background: rgba(240,195,31,0.05);
+    }
+
+    /* ── Botões ── */
+    .btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+      opacity: 0;
+      animation: surgir 0.5s ease 3.7s forwards;
+    }
+
+    .Entrar, .Registrar {
+      padding: 11px 20px;
+      border-radius: 5px;
+      font-family: 'Crimson Pro', serif;
+      font-size: 17px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .Entrar {
+      background: rgba(240,195,31,0.15);
+      color: #f0c31f;
+      border: 1px solid rgba(240,195,31,0.5);
+      font-weight: 600;
+    }
+
+    .Entrar:hover {
+      background: rgba(240,195,31,0.28);
+    }
+
+    .Registrar {
+      background: transparent;
+      color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .Registrar:hover {
+      background: rgba(255,255,255,0.07);
+      color: white;
+    }
+
+    /* ── Erro ── */
+    .msg-erro {
+      display: none;
+      font-size: 14px;
+      color: #ffaaaa;
+      text-align: center;
+      padding: 8px;
+      background: rgba(255,100,100,0.1);
+      border: 1px solid rgba(255,100,100,0.2);
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    /* ── Rodapé ── */
+    .rodape {
+      margin-top: 24px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.3);
+      font-family: 'Anonymous Pro', monospace;
+      letter-spacing: 0.05em;
+      animation: surgir 0.5s ease 4s forwards;
+      opacity: 0;
+    }
