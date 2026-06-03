@@ -1,0 +1,191 @@
+
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 22px;
+    font-family: 'Crimson Pro', serif;
+}
+.login-container {
+    color:white;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    padding: 80px 220px;
+    border-radius: 5px;
+    backdrop-filter: blur(120px); /* Aplica o desfoque ao fundo */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Borda de vidro */
+}
+
+.Registrar {
+    background-color: transparent;
+    color: white;
+    align-items: right;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.Entrar {
+    background-color: transparent;
+    color: white;
+    align-items: left;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+/* Estilos para os campos de entrada e botão */
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: transparent;
+    color: white;
+}
+.apetec {
+    color: #f0c31f;
+    font-weight: bold;
+}
+/* Google Fonts */
+@import url(https://fonts.googleapis.com/css?family=Anonymous+Pro);
+
+/* Cursor */
+.cursor{
+    position: relative;
+    width: 24em;
+    margin: 0 auto;
+    border-right: 2px solid rgba(255,255,255,.75);
+    font-size: 30px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    transform: translateY(-50%);    
+}
+/* Animation */
+.typewriter-animation {
+  animation: 
+    typewriter 3.2s steps(50) 1s 1 normal both, 
+    blinkingCursor 500ms steps(50) infinite normal;
+}
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+@keyframes blinkingCursor{
+  from { border-right-color: rgba(255,255,255,.75); }
+  to { border-right-color: transparent; }
+}
+
+/* Define a animação do fundo do site */
+@keyframes move {
+    100% {
+        transform: translate3d(0, 0, 1px) rotate(360deg);
+    }
+}
+
+.background {
+    z-index: -1;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    background: #570000;
+    overflow: hidden;
+}
+
+.background span {
+
+    width: 25vmin;
+    height: 25vmin;
+    border-radius: 25vmin;
+    backface-visibility: hidden;
+    position: absolute;
+    animation: move;
+    animation-duration: 45;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+
+.background span:nth-child(0) {
+    color: #ebbc14;
+    top: 65%;
+    left: 32%;
+    animation-duration: 20s;
+    animation-delay: -2s;
+    transform-origin: 8vw -3vh;
+    box-shadow: 50vmin 0 6.64795459763602vmin currentColor;
+}
+.background span:nth-child(1) {
+    color: #ebbc14;
+    top: 84%;
+    left: 48%;
+    animation-duration: 49s;
+    animation-delay: -9s;
+    transform-origin: -8vw -3vh;
+    box-shadow: 50vmin 0 6.56827459369005vmin currentColor;
+}
+.background span:nth-child(2) {
+    color: #ebbc14;
+    top: 41%;
+    left: 42%;
+    animation-duration: 11s;
+    animation-delay: -22s;
+    transform-origin: -17vw 8vh;
+    box-shadow: -50vmin 0 6.582899440555923vmin currentColor;
+}
+.background span:nth-child(3) {
+    color: #ebbc14;
+    top: 92%;
+    left: 63%;
+    animation-duration: 24s;
+    animation-delay: -42s;
+    transform-origin: 12vw -19vh;
+    box-shadow: -50vmin 0 6.729506750398684vmin currentColor;
+}
+.background span:nth-child(4) {
+    color: #ebbc14;
+    top: 34%;
+    left: 8%;
+    animation-duration: 46s;
+    animation-delay: -15s;
+    transform-origin: 17vw -10vh;
+    box-shadow: 50vmin 0 6.61333631438075vmin currentColor;
+}
+.background span:nth-child(5) {
+    color: #ebbc14;
+    top: 65%;
+    left: 97%;
+    animation-duration: 8s;
+    animation-delay: -11s;
+    transform-origin: -7vw -6vh;
+    box-shadow: 50vmin 0 6.687183300056045vmin currentColor;
+}
+.background span:nth-child(6) {
+    color: #ebbc14;
+    top: 51%;
+    left: 96%;
+    animation-duration: 44s;
+    animation-delay: -28s;
+    transform-origin: 21vw -16vh;
+    box-shadow: -50vmin 0 7.027164758917124vmin currentColor;
+}
+.background span:nth-child(7) {
+    color: #ebbc14;
+    top: 1%;
+    left: 52%;
+    animation-duration: 7s;
+    animation-delay: -22s;
+    transform-origin: -14vw 4vh;
+    box-shadow: -50vmin 0 7.010716968347578vmin currentColor;
+}
