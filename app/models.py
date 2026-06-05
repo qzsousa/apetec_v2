@@ -14,13 +14,29 @@ class CargoEnum(str, Enum):
     limpeza       = "limpeza"
     seguranca     = "segurança"
 
+class TurmaModuloEnum(str, Enum):
+    turma_1dsa = "1 DS A"
+    turma_1dsb = "1 DS B"
+    turma_2dsa = "2 DS A"
+    turma_2dsb = "2 DS B"
+    turma_3dsa = "3 DS A"
+    turma_3dsb = "3 DS B"
+    turma_1adma = "1 ADM A"
+    turma_1admb = "1 ADM B"
+    turma_2adma = "2 ADM A"
+    turma_2admb = "2 ADM B"
+    turma_3adma = "3 ADM A"
+    turma_3admb = "3 ADM B"
+    modulo_adm = "Módular ADM"
+    modulo_ds = "Módular DS"
+
 #classe para criar a tabela de usuarios na database
 class Usuario(SQLModel, table=True):  #table=true para o SQLModel confirmar que é uma tabela realmente e não um schema de validação
-    rm: int = Field(primary_key=True) 
+    cpf: str = Field(primary_key=True) 
     nome: str 
     telefone: str
     email: EmailStr
-    turma_modulo: str
+    turma_modulo: TurmaModuloEnum
     cargo: CargoEnum
     senha: str
 
@@ -43,7 +59,7 @@ class Chamado (SQLModel, table=True):
     data_perda: date
     local_perda: str
     status: str
-    rm_usuario: int = Field(foreign_key="usuario.rm")
+    cpf_usuario_usuario: int = Field(foreign_key="usuario.cpf")
     id_item: Optional[int] = Field(default=None, foreign_key="item.id")
 
 class Secretaria(SQLModel, table=True):
@@ -54,7 +70,7 @@ class Secretaria(SQLModel, table=True):
     senha: str
 
 class UsuarioCreate(SQLModel):
-    rm: int
+    cpf: str
     nome: str
     telefone: str
     email: EmailStr
@@ -84,11 +100,11 @@ class ChamadoUpdate(SQLModel):
     data_perda: Optional[date] = None
     local_perda: Optional[str] = None
     status: Optional[str] = None
-    rm_usuario: Optional[int] = None
+    cpf_usuario: Optional[int] = None
     id_item: Optional[int] = None
 
 class LoginUsuario(SQLModel):
-    rm: int
+    cpf: str
     senha: str
 
 class LoginSecretaria(SQLModel):

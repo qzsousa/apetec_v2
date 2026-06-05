@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apetec - Cadastro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Anonymous+Pro&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style/style.css">
+</head>
+<body>
+
+<div class="background">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<div class="register-container" id="register-container">
+
+  <div class="cabecalho">
+    <div class="titulo">Cadastro — <span class="apetec">APETEC</span></div>
+    <p class="subtitulo">Preencha os dados para criar sua conta</p>
+  </div>
+
+  <div class="form-grupo">
+    <label for="input-cpf">CPF</label>
+    <input oninput="mascaraCPF(this)" type="text" id="input-cpf" placeholder="Digite seu CPF" max-length="11">
+  </div>
+
+  <div class="form-grupo">
+    <label for="input-nome">Nome completo</label>
+    <input type="text" id="input-nome" placeholder="Digite seu nome">
+  </div>
+
+  <div class="form-grupo">
+    <label for="input-telefone">Telefone</label>
+    <input type="text" id="input-telefone" placeholder="(00) 00000-0000" maxlength="15">
+  </div>
+
+  <div class="form-grupo">
+    <label for="input-email">E-mail</label>
+    <input type="email" id="input-email" placeholder="seu@email.com">
+  </div>
+
+  <div class="form-grupo">
+    <label for="input-turma">Turma / Módulo</label>
+    <select id="input-turma">
+      <option value="" disabled selected>Selecione sua turma ou curso</option>
+      <option value="1 DS A">1º DS A</option>
+      <option value="1 DS B">1º DS B</option>
+      <option value="2 DS A">2º DS A</option>
+      <option value="2 DS B">2ª DS B</option>
+      <option value="3 DS A">3º DS A</option>
+      <option value="3 DS B">3º DS B</option>
+      <option value="1 ADM A">1º ADM A</option>
+      <option value="1 ADM B">1º ADM B</option>
+      <option value="2 ADM A">2º ADM A</option>
+      <option value="2 ADM B">2ª ADM B</option>
+      <option value="3 ADM A">3º ADM A</option>
+      <option value="3 ADM B">3º ADM B</option>
+      <option value="Módular ADM">Módular de Administração</option>
+      <option value="Módular DS">Módular de Desenolvimento de Sistemas</option>
+    </select>
+  </div>
+
+  <div class="form-grupo">
+    <label for="input-cargo">Cargo</label>
+    <select id="input-cargo">
+      <option value="" disabled selected>Selecione seu cargo</option>
+      <option value="aluno">Aluno</option>
+      <option value="professor">Professor</option>
+      <option value="administrativo">Administrativo</option>
+      <option value="cozinha">Cozinha</option>
+      <option value="limpeza">Limpeza</option>
+      <option value="segurança">Segurança</option>
+    </select>
+  </div> 
+
+  <div class="form-grupo">
+    <label for="input-senha">Senha</label>
+    <input type="password" id="input-senha" placeholder="••••••••">
+  </div>
+
+  <div class="msg" id="msg"></div>
+
+  <div class="btns">
+    <button class="Cadastrar" onclick="cadastrar()">Cadastrar</button>
+    <button class="Voltar" onclick="window.location.href='login.html'">Voltar</button>
+  </div>
+
+</div>
+
+<div class="mensagem_sucesso" id="mensagem_sucesso"> 
+    <p>Cadastro realizado com sucesso!</p>
+    <button onclick="window.location.href='login.html'">Ir para Login</button>
+</div>
+
+
+<p class="rodape">Apetec · Sistema de Achados e Perdidos Escolar</p>
+
+<script>
+    function mascaraCPF(i){
+   
+   var v = i.value;
+   
+   if(isNaN(v[v.length-1])){ // impede entrar outro caractere que não seja número
+      i.value = v.substring(0, v.length-1);
+      return;
+   }
+   
+   i.setAttribute("maxlength", "14");
+   if (v.length == 3 || v.length == 7) i.value += ".";
+   if (v.length == 11) i.value += "-";
+
+}
+
+    function validarCPF(cpf) {
+    // Remove tudo que não é número
+    cpf = cpf.replace(/[^\d]/g, '');
+
+    // Verifica se tem 11 dígitos ou se é uma sequência repetida
+    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+    // Validação dos dois dígitos verificadores
+    for (let t = 9; t < 11; t++) {
+        let soma = 0;
+        for (let i = 0; i < t; i++) {
+            soma += parseInt(cpf.charAt(i)) * (t + 1 - i);
+        }
+        
+        let digito = (soma * 10) % 11;
+        if (digito === 10 || digito === 11) digito = 0;
+        
+        if (digito !== parseInt(cpf.charAt(t))) return false;
+    }
+
+    return true;
+}
+    const telefoneInput = document.getElementById('input-telefone');
+
+    telefoneInput.addEventListener('input', (e) => {
+    let valor = e.target.value.replace(/\D/g, ''); // Remove tudo que não é número
+    valor = valor.replace(/^(\d{2})(\d)/g, '($1) $2'); // Coloca parênteses nos dois primeiros dígitos
+    valor = valor.replace(/(\d)(\d{4})$/, '$1-$2'); // Coloca hífen entre o quarto e o quinto dígitos
+    e.target.value = valor;
+    });
+
+  async function cadastrar() {
+
+    if (!validarCPF(document.getElementById('input-cpf').value)) {
+      mostrarMensagem('CPF inválido. Digite um CPF válido.', 'erro');
+      return;
+    }
+    const msg = document.getElementById('msg');
+    msg.style.display = 'none';
+
+    const body = {
+      cpf:          document.getElementById('input-cpf').value.trim(),
+      nome:         document.getElementById('input-nome').value.trim(),
+      telefone:     document.getElementById('input-telefone').value.trim(),
+      email:        document.getElementById('input-email').value.trim(),
+      turma_modulo: document.getElementById('input-turma').value.trim(),
+      cargo:        document.getElementById('input-cargo').value,
+      senha:        document.getElementById('input-senha').value
+    };
+
+    // Validação básica no frontend
+    if (!body.cpf || !body.nome || !body.telefone || !body.email || !body.turma_modulo || !body.cargo || !body.senha) {
+      mostrarMensagem('Preencha todos os campos.', 'erro');
+      return;
+    }
+   if (!body.email.includes("@") || !body.email.includes(".")) {
+      mostrarMensagem('Digite um e-mail válido.', 'erro');
+      return;
+    }
+
+    try {
+    const res  = await fetch('http://localhost:8000/usuarios/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+        mostrarMensagem('Erro ao cadastrar. Verifique os dados.', 'erro');
+        return;
+    }
+
+    // só aparece se deu 201
+    document.getElementById('register-container').style.display = 'none';
+    document.getElementById('mensagem_sucesso').style.display = 'flex';
+
+} catch {
+    mostrarMensagem('Erro ao conectar com o servidor.', 'erro');
+}
+  }
+
+  function mostrarMensagem(texto, tipo) {
+    const el = document.getElementById('msg');
+    el.textContent = texto;
+    el.className = 'msg' + tipo;
+    el.style.display = 'block';
+  }
+</script>
+
+</body>
+</html>

@@ -1,3 +1,5 @@
+    /* ── LOGIN ── */
+    
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     /* ── Fundo animado (original mantido) ── */
@@ -95,7 +97,7 @@
       font-weight: 700;
     }
 
-    .titulo {
+    .login-container .titulo {
       font-size: 18px;
       font-weight: 400;
       color: rgba(255,255,255,0.8);
@@ -103,7 +105,7 @@
       opacity: 0;
       animation: surgir 0.5s ease 3.3s forwards;
     }
-    .subtitulo   {
+    .login-container .subtitulo   {
       font-size: 15px;
       font-weight: 300;
       color: rgba(255,255,255,0.6);
@@ -117,7 +119,7 @@
     }
 
     /* ── Seletor de perfil ── */
-    .tipo-selector {
+    .login-container .tipo-selector {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
@@ -130,7 +132,7 @@
       animation: surgir 0.5s ease 3.5s forwards;
     }
 
-    .tipo-btn {
+    .login-container .tipo-btn {
       padding: 8px;
       border: none;
       background: transparent;
@@ -149,7 +151,7 @@
     }
 
     /* ── Formulário ── */
-    .form-grupo {
+   .login-container .form-grupo {
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -185,8 +187,9 @@
       background: rgba(240,195,31,0.05);
     }
 
+    
     /* ── Botões ── */
-    .btns {
+    .login-container .btns {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
@@ -230,17 +233,27 @@
     .msg-erro {
       display: none;
       font-size: 14px;
-      color: #ffaaaa;
+      color: #fff;
       text-align: center;
       padding: 8px;
-      background: rgba(255,100,100,0.1);
-      border: 1px solid rgba(255,100,100,0.2);
+      background: rgba(180, 0, 0, 0.6);
+      border: 1px solid rgba(255, 100, 100, 0.6);
       border-radius: 5px;
       margin-top: 10px;
     }
-
+    .msg {
+      display: none;
+      font-size: 14px;
+      color: #fff;
+      text-align: center;
+      padding: 8px;
+      background: rgba(180, 0, 0, 0.6);
+      border: 1px solid rgba(255, 100, 100, 0.6);
+      border-radius: 5px;
+      margin-top: 10px;
+    }
     /* ── Rodapé ── */
-    .rodape {
+    .login-container .rodape {
       margin-top: 24px;
       font-size: 13px;
       color: rgba(255,255,255,0.3);
@@ -249,3 +262,249 @@
       animation: surgir 0.5s ease 4s forwards;
       opacity: 0;
     }
+
+    /* ── PAGINA DE REGISTRO ── */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @keyframes move {
+      100% { transform: translate3d(0, 0, 1px) rotate(360 deg); }
+    }
+
+    .background {
+      z-index: -1;
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0; left: 0;
+      background: #570000;
+      overflow: hidden;
+    }
+
+    .background span {
+      width: 25vmin;
+      height: 25vmin;
+      border-radius: 50%;
+      backface-visibility: hidden;
+      position: absolute;
+      animation: move linear infinite;
+    }
+
+    .background span:nth-child(1) { color:#ebbc14; top:65%; left:32%; animation-duration:20s; animation-delay:-2s;  transform-origin: 8vw  -3vh; box-shadow: 50vmin 0 6.6vmin currentColor; }
+    .background span:nth-child(2) { color:#ebbc14; top:84%; left:48%; animation-duration:49s; animation-delay:-9s;  transform-origin:-8vw  -3vh; box-shadow: 50vmin 0 6.5vmin currentColor; }
+    .background span:nth-child(3) { color:#ebbc14; top:41%; left:42%; animation-duration:11s; animation-delay:-22s; transform-origin:-17vw  8vh; box-shadow:-50vmin 0 6.5vmin currentColor; }
+    .background span:nth-child(4) { color:#ebbc14; top:92%; left:63%; animation-duration:24s; animation-delay:-42s; transform-origin: 12vw -19vh; box-shadow:-50vmin 0 6.7vmin currentColor; }
+    .background span:nth-child(5) { color:#ebbc14; top:34%; left: 8%; animation-duration:46s; animation-delay:-15s; transform-origin: 17vw -10vh; box-shadow: 50vmin 0 6.6vmin currentColor; }
+    .background span:nth-child(6) { color:#ebbc14; top:65%; left:97%; animation-duration: 8s; animation-delay:-11s; transform-origin: -7vw  -6vh; box-shadow: 50vmin 0 6.6vmin currentColor; }
+    .background span:nth-child(7) { color:#ebbc14; top:51%; left:96%; animation-duration:44s; animation-delay:-28s; transform-origin: 21vw -16vh; box-shadow:-50vmin 0 7.0vmin currentColor; }
+    .background span:nth-child(8) { color:#ebbc14; top: 1%; left:52%; animation-duration: 7s; animation-delay:-22s; transform-origin:-14vw   4vh; box-shadow:-50vmin 0 7.0vmin currentColor; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Crimson Pro', serif;
+      font-size: 20px;
+      color: white;
+      padding: 2rem 0;
+    }
+
+    .register-container {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      width: min(480px, 90vw);
+      padding: 48px 56px;
+      border-radius: 8px;
+      backdrop-filter: blur(120px);
+      -webkit-backdrop-filter: blur(120px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.04);
+      animation: fadeUp 0.7s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .cabecalho {
+      margin-bottom: 28px;
+    }
+
+    .titulo {
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .apetec {
+      color: #f0c31f;
+      font-weight: 700;
+    }
+
+    .subtitulo {
+      font-size: 15px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.6);
+      margin-top: 6px;
+    }
+
+    .form-grupo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .form-grupo label {
+      font-size: 14px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.65);
+      letter-spacing: 0.04em;
+    }
+
+    .form-grupo input,
+    .form-grupo select {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 5px;
+      font-family: 'Crimson Pro', serif;
+      font-size: 17px;
+      color: white;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .form-grupo input::placeholder { color: rgba(255,255,255,0.3); }
+
+    .form-grupo input:focus,
+    .form-grupo select:focus {
+      border-color: rgba(240,195,31,0.6);
+      background: rgba(240,195,31,0.05);
+    }
+
+    /* Remove o fundo padrão do select no Chrome */
+    .form-grupo select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+    }
+
+    .form-grupo select option {
+      background: #570000;
+      color: white;
+    }
+
+    .register-container .btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .register-container .Cadastrar, .Voltar {
+      padding: 11px 20px;
+      border-radius: 5px;
+      font-family: 'Crimson Pro', serif;
+      font-size: 17px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .register-container .Cadastrar {
+      background: rgba(240,195,31,0.15);
+      color: #f0c31f;
+      border: 1px solid rgba(240,195,31,0.5);
+      font-weight: 600;
+    }
+
+    .Cadastrar:hover { background: rgba(240,195,31,0.28); }
+
+    .Voltar {
+      background: transparent;
+      color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .Voltar:hover {
+      background: rgba(255,255,255,0.07);
+      color: white;
+    }
+
+    .msg {
+      display: none;
+      font-size: 14px;
+      text-align: center;
+      padding: 8px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    .msg.erro {
+      color: #ffaaaa;
+      background: rgba(255,100,100,0.1);
+      border: 1px solid rgba(255,100,100,0.2);
+    }
+
+    .msg.sucesso {
+      color: #aaffcc;
+      background: rgba(100,255,160,0.1);
+      border: 1px solid rgba(100,255,160,0.2);
+    }
+
+    .rodape {
+      margin-top: 24px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.3);
+      font-family: 'Anonymous Pro', monospace;
+      letter-spacing: 0.05em;
+    }
+    .mensagem_sucesso {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    width: min(480px, 90vw);
+    padding: 48px 56px;
+    border-radius: 8px;
+    backdrop-filter: blur(120px);
+    -webkit-backdrop-filter: blur(120px);
+    border: 1px solid rgba(100,255,160,0.2);
+    background: rgba(100,255,160,0.04);
+    text-align: center;
+    color: #aaffcc;
+    font-size: 22px;
+    animation: fadeUp 0.7s ease both;
+}
+
+.mensagem_sucesso p {
+    font-size: 22px;
+    font-weight: 600;
+    color: white;
+}
+
+.mensagem_sucesso button {
+    padding: 10px 28px;
+    background: transparent;
+    color: #aaffcc;
+    border: 1px solid rgba(100,255,160,0.4);
+    border-radius: 5px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 17px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mensagem_sucesso button:hover {
+    background: rgba(100,255,160,0.1);
+    border-color: rgba(100,255,160,0.7);
+}

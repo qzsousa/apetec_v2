@@ -8,10 +8,10 @@ router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
 @router.post("/login/usuario")
 def login_usuario(login_data: LoginUsuario, session: Session = Depends(get_session)):
-    usuario = session.get(Usuario, login_data.rm)
+    usuario = session.get(Usuario, login_data.cpf)
     if not usuario or not verificar_senha(login_data.senha, usuario.senha):
         raise HTTPException(status_code=401, detail="Credenciais inválidas")
-    token = criar_token({"sub": str(usuario.rm), "tipo": "usuario"})
+    token = criar_token({"sub": str(usuario.cpf), "tipo": "usuario"})
     return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/login/secretaria")

@@ -28,12 +28,7 @@
     <button class="tipo-btn" id="btn-secretaria" onclick="selecionarTipo('secretaria')">Secretaria</button>
   </div>
 
-  <div class="form-grupo" id="grupo-rm">
-    <label for="input-rm">RM</label>
-    <input type="number" id="input-rm" placeholder="Digite seu RM">
-  </div>
-
-  <div class="form-grupo" id="grupo-cpf" style="display:none">
+  <div class="form-grupo" id="grupo-cpf">
     <label for="input-cpf">CPF</label>
     <input type="text" id="input-cpf" placeholder="000.000.000-00">
   </div>
@@ -68,24 +63,21 @@
     document.getElementById('grupo-rm').style.opacity = '1';
   }
 
+  let url, body;  
+  
   async function fazerLogin() {
     const senha = document.getElementById('input-senha').value.trim();
     const erro  = document.getElementById('msg-erro');
     erro.style.display = 'none';
 
-    let url, body;
+    const cpf = document.getElementById('input-cpf').value.trim();
+    if (!cpf || !senha) { mostrarErro('Preencha CPF e senha.'); return; }
 
-    if (tipoAtual === 'aluno') {
-      const rm = document.getElementById('input-rm').value.trim();
-      if (!rm || !senha) { mostrarErro('Preencha RM e senha.'); return; }
-      url  = 'http://localhost:8000/auth/login/usuario';
-      body = { rm: parseInt(rm), senha };
-    } else {
-      const cpf = document.getElementById('input-cpf').value.trim();
-      if (!cpf || !senha) { mostrarErro('Preencha CPF e senha.'); return; }
-      url  = 'http://localhost:8000/auth/login/secretaria';
-      body = { cpf, senha };
-    }
+    const url = tipoAtual === 'aluno' 
+    ? 'http://localhost:8000/auth/login/usuario'
+    : 'http://localhost:8000/auth/login/secretaria';
+
+    const body = { cpf, senha };
 
     try {
       const res  = await fetch(url, {
