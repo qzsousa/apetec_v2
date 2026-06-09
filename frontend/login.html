@@ -6,6 +6,7 @@
   <title>Apetec - Login</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Anonymous+Pro&display=swap" rel="stylesheet">
+  <script src="./js/auth.js"></script>
   <link rel="stylesheet" href="./style/style.css">
 </head>
 <body>
@@ -56,14 +57,9 @@
     tipoAtual = tipo;
     document.getElementById('btn-aluno').classList.toggle('ativo', tipo === 'aluno');
     document.getElementById('btn-secretaria').classList.toggle('ativo', tipo === 'secretaria');
-    document.getElementById('grupo-rm').style.display  = tipo === 'aluno'      ? '' : 'none';
-    document.getElementById('grupo-cpf').style.display = tipo === 'secretaria' ? '' : 'none';
     document.getElementById('msg-erro').style.display  = 'none';
     document.getElementById('grupo-cpf').style.opacity = '1';
-    document.getElementById('grupo-rm').style.opacity = '1';
   }
-
-  let url, body;  
   
   async function fazerLogin() {
     const senha = document.getElementById('input-senha').value.trim();
