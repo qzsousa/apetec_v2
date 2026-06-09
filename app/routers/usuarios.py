@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.models import Usuario, UsuarioCreate, UsuarioUpdate
 from app.database import get_session
 from sqlmodel import Session, select
-from app.auth import hash_senha
+from app.auth import hash_senha, get_usuario_atual
 
 
 
@@ -22,6 +22,16 @@ def listar_usuarios(session: Session = Depends(get_session)):
     usuarios = session.exec(select(Usuario)).all() # aqui ele executa a consulta para selecionar todos os usuarios da tabela Usuario e retorna uma lista de objetos Usuario, ou seja, ele retorna todos os usuarios cadastrados no banco de dados
     return usuarios
 
+@router.get("/me")
+def meu_perfil(session: Session = Depends(get_session), usuario_atual: dict = Depends(get_usuario_atual)):
+    cpf = usuario_atual["sub"]
+    print(f"CPF do token: '{cpf}'")
+    usuario = session.get(Usuario, cpf)
+    print(f"Usuario encontrado: {usuario}")
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return usuario
+
 @router.get("/{cpf}")
 def buscar_usuario(cpf: str, session: Session = Depends(get_session)):
     usuario = session.get(Usuario, cpf) # aqui ele busca o usuario pelo cpf, ou seja, ele procura o usuario com o cpf especificado e retorna o objeto Usuario correspondente, ou seja, ele retorna o usuario encontrado no banco de dados
@@ -40,6 +50,8 @@ def atualizar_dados_usuario(dados: UsuarioUpdate, cpf: str, session: Session = D
     session.refresh(usuario) # aqui ele atualiza o objeto usuario com os dados do banco de dados, ou seja, se o banco de dados gerar um id automaticamente, ele vai atualizar o objeto usuario com esse id
     return usuario
 
+
+
 @router.delete("/{cpf}", status_code=204)
 def deletar_usuario(cpf: str, session: Session = Depends(get_session)):
     usuario = session.get(Usuario, cpf)
@@ -47,3 +59,4 @@ def deletar_usuario(cpf: str, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     session.delete(usuario) # aqui ele marca o usuario para ser deletado, ou seja, ele prepara para remover o usuario do banco de dados, mas ainda não remove de fato
     session.commit()   # aqui ele conficpfa a remoção do usuario no banco de dados, ou seja, ele executa a operação de delete no banco de dados, removendo o usuario de fato
+

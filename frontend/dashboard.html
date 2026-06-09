@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apetec - Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Anonymous+Pro&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style/style.css">
+</head>
+<body>
+
+<!-- Fundo animado -->
+<div class="background">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<!-- Topo -->
+<header class="dash-header">
+  <div class="dash-logo">✦ <span class="apetec">APETEC</span></div>
+  <div class="dash-usuario">
+    <span class="dash-nome" id="dash-nome">Carregando...</span>
+    <button class="btn-perfil" onclick="abrirAba('perfil')" title="Perfil">⊙</button>
+    <button class="btn-logout" onclick="logout()" title="Sair">↩</button>
+  </div>
+</header>
+
+<!-- Abas -->
+<nav class="dash-tabs">
+  <button class="tab-btn ativo" id="tab-novo"    onclick="abrirAba('novo')">+ Novo Chamado</button>
+  <button class="tab-btn"       id="tab-chamados" onclick="abrirAba('chamados')">Meus Chamados</button>
+  <button class="tab-btn"       id="tab-perfil"  onclick="abrirAba('perfil')">Perfil</button>
+</nav>
+
+<!-- Conteúdo -->
+<main class="dash-main">
+
+  <!-- ── ABA: NOVO CHAMADO ── -->
+  <section class="dash-section ativo" id="sec-novo">
+    <div class="dash-card">
+      <h2 class="card-titulo">Abrir novo chamado</h2>
+      <p class="card-sub">Descreva o item que você perdeu. A secretaria entrará em contato.</p>
+
+      <div class="form-grupo">
+        <label for="nc-tipo">Tipo do item</label>
+        <input type="text" id="nc-tipo" placeholder="Ex: mochila, carteira, fone...">
+      </div>
+      <div class="form-grupo">
+        <label for="nc-marca">Marca</label>
+        <input type="text" id="nc-marca" placeholder="Ex: Nike, Samsung...">
+      </div>
+      <div class="form-grupo">
+        <label for="nc-cor">Cor</label>
+        <input type="text" id="nc-cor" placeholder="Ex: preto, azul marinho...">
+      </div>
+      <div class="form-grupo">
+        <label for="nc-local">Local da perda</label>
+        <input type="text" id="nc-local" placeholder="Ex: Corredor bloco B, quadra...">
+      </div>
+      <div class="form-grupo">
+        <label for="nc-data">Data aproximada da perda</label>
+        <input type="date" id="nc-data">
+      </div>
+      <div class="form-grupo">
+        <label for="nc-criterio">Como podemos confirmar que é seu?</label>
+        <input type="text" id="nc-criterio" placeholder="Ex: tem adesivo de caveira na alça esquerda">
+      </div>
+
+      <div class="msg-dash" id="msg-novo"></div>
+
+      <div class="btns">
+        <button class="btn-primario" onclick="abrirChamado()">Enviar chamado</button>
+        <button class="btn-secundario" onclick="limparFormulario()">Limpar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ABA: MEUS CHAMADOS ── -->
+  <section class="dash-section" id="sec-chamados">
+    <div class="dash-card">
+      <h2 class="card-titulo">Meus chamados</h2>
+      <p class="card-sub">Acompanhe o status dos seus chamados abertos e finalizados.</p>
+
+      <div class="legenda-status">
+        <span class="badge em_aberto">Em aberto</span>
+        <span class="badge respondido">Respondido</span>
+        <span class="badge finalizado">Finalizado</span>
+      </div>
+
+      <div id="lista-chamados" class="lista-chamados">
+        <p class="estado-vazio">Carregando chamados...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ABA: PERFIL ── -->
+  <section class="dash-section" id="sec-perfil">
+    <div class="dash-card">
+      <h2 class="card-titulo">Meu perfil</h2>
+      <p class="card-sub">Seus dados cadastrados no sistema.</p>
+
+      <div class="perfil-grid" id="perfil-grid">
+        <p class="estado-vazio">Carregando dados...</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<p class="rodape">Apetec · Sistema de Achados e Perdidos Escolar</p>
+
+<script src="./js/auth.js"></script>
+<script>
+
+  // ── Inicialização ──
+  const token = verificarLogin();
+  const tipo  = localStorage.getItem('tipo_usuario');
+
+  // Se for secretaria, manda para o dashboard correto (quando existir)
+  // if (tipo === 'secretaria') window.location.href = 'dashboard-secretaria.html';
+
+  carregarPerfil();
+
+  // ── Navegação entre abas ──
+  function abrirAba(aba) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativo'));
+    document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('ativo'));
+    document.getElementById('tab-' + aba).classList.add('ativo');
+    document.getElementById('sec-' + aba).classList.add('ativo');
+
+    if (aba === 'chamados') carregarChamados();
+    if (aba === 'perfil')   carregarPerfil();
+  }
+
+  // ── Carregar perfil ──
+  async function carregarPerfil() {
+    try {
+      const res  = await chamarAPI('/usuarios/me', 'GET');
+      const data = await res.json();
+      if (!res.ok) { logout(); return; }
+
+      document.getElementById('dash-nome').textContent = data.nome.split(' ')[0];
+
+      document.getElementById('perfil-grid').innerHTML = `
+        <div class="perfil-campo"><span class="perfil-label">Nome</span><span class="perfil-valor">${data.nome}</span></div>
+        <div class="perfil-campo"><span class="perfil-label">CPF</span><span class="perfil-valor">${data.cpf}</span></div>
+        <div class="perfil-campo"><span class="perfil-label">E-mail</span><span class="perfil-valor">${data.email}</span></div>
+        <div class="perfil-campo"><span class="perfil-label">Telefone</span><span class="perfil-valor">${data.telefone}</span></div>
+        <div class="perfil-campo"><span class="perfil-label">Turma / Módulo</span><span class="perfil-valor">${data.turma_modulo}</span></div>
+        <div class="perfil-campo"><span class="perfil-label">Cargo</span><span class="perfil-valor">${data.cargo}</span></div>
+      `;
+    } catch {
+      document.getElementById('perfil-grid').innerHTML = '<p class="estado-vazio">Erro ao carregar dados.</p>';
+    }
+  }
+
+  // ── Carregar chamados ──
+  async function carregarChamados() {
+    const lista = document.getElementById('lista-chamados');
+    lista.innerHTML = '<p class="estado-vazio">Carregando...</p>';
+    try {
+      const res  = await chamarAPI('/chamados/', 'GET');
+      const data = await res.json();
+      if (!res.ok) { lista.innerHTML = '<p class="estado-vazio">Erro ao carregar chamados.</p>'; return; }
+
+      if (data.length === 0) {
+        lista.innerHTML = '<p class="estado-vazio">Você ainda não abriu nenhum chamado.</p>';
+        return;
+      }
+
+      lista.innerHTML = data.map(c => `
+        <div class="chamado-item">
+          <div class="chamado-info">
+            <span class="chamado-tipo">${c.tipo} · ${c.marca}</span>
+            <span class="chamado-detalhe">${c.cor} — ${c.local_perda}</span>
+            <span class="chamado-data">${formatarData(c.data_perda)}</span>
+          </div>
+          <span class="badge ${c.status}">${labelStatus(c.status)}</span>
+        </div>
+      `).join('');
+    } catch {
+      lista.innerHTML = '<p class="estado-vazio">Erro ao conectar com o servidor.</p>';
+    }
+  }
+
+  // ── Abrir chamado ──
+  async function abrirChamado() {
+    const campos = {
+      tipo:               document.getElementById('nc-tipo').value.trim(),
+      marca:              document.getElementById('nc-marca').value.trim(),
+      cor:                document.getElementById('nc-cor').value.trim(),
+      local_perda:        document.getElementById('nc-local').value.trim(),
+      data_perda:         document.getElementById('nc-data').value,
+      criterio_validacao: document.getElementById('nc-criterio').value.trim(),
+    };
+
+    if (Object.values(campos).some(v => !v)) {
+      mostrarMsg('msg-novo', 'Preencha todos os campos.', 'erro');
+      return;
+    }
+
+    try {
+      const res = await chamarAPI('/chamados/', 'POST', campos);
+      if (!res.ok) { mostrarMsg('msg-novo', 'Erro ao abrir chamado. Tente novamente.', 'erro'); return; }
+      mostrarMsg('msg-novo', 'Chamado aberto com sucesso!', 'sucesso');
+      limparFormulario();
+    } catch {
+      mostrarMsg('msg-novo', 'Erro ao conectar com o servidor.', 'erro');
+    }
+  }
+
+  // ── Helpers ──
+  function limparFormulario() {
+    ['nc-tipo','nc-marca','nc-cor','nc-local','nc-data','nc-criterio'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+  }
+
+  function mostrarMsg(id, texto, tipo) {
+    const el = document.getElementById(id);
+    el.textContent = texto;
+    el.className = 'msg-dash ' + tipo;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
+  }
+
+  function formatarData(data) {
+    if (!data) return '—';
+    const [ano, mes, dia] = data.split('-');
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  function labelStatus(status) {
+    const labels = { em_aberto: 'Em aberto', respondido: 'Respondido', finalizado: 'Finalizado' };
+    return labels[status] || status;
+  }
+
+</script>
+</body>
+</html>

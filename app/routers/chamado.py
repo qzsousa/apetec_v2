@@ -9,7 +9,8 @@ router = APIRouter(prefix="/chamados", tags=["Chamados"])
 
 #cadastra um novo chamado
 @router.post("/", status_code=201)
-def cadastrar_chamado(chamado: Chamado, session: Session = Depends(get_session)):
+def cadastrar_chamado(chamado: Chamado, session: Session = Depends(get_session), usuario: dict = Depends(get_usuario_atual)):
+    chamado.cpf_usuario_usuario = usuario["sub"] #associa o chamado ao cpf do usuario logado
     chamado.status = "em_aberto" #pre-define todo chamado novo aberto como "em_aberto"
     chamado.data_perda = datetime.strptime(str(chamado.data_perda), "%Y-%m-%d").date() #converte a data str para date
     session.add(chamado)
@@ -19,7 +20,8 @@ def cadastrar_chamado(chamado: Chamado, session: Session = Depends(get_session))
 
 @router.get("/")
 def listar_chamados(session: Session = Depends(get_session), usuario: dict = Depends(get_usuario_atual)):
-    chamados = session.exec(select(Chamado)).all()
+    cpf = usuario["sub"]
+    chamados = session.exec(select(Chamado).where(Chamado.cpf_usuario_usuario == cpf)).all() # filtra somente os chamados do usuario logado 
     return chamados
 
 @router.get("/{id}")

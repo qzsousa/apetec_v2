@@ -110,3 +110,4 @@ class LoginUsuario(SQLModel):
 class LoginSecretaria(SQLModel):
     cpf: str
     senha: str
+
