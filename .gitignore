@@ -7,6 +7,8 @@ database.db
 # Variáveis de ambiente
 .env
 
+#dados da secretaria
+.criar-secretaria.py
 # Cache do Python
 __pycache__/
 *.pyc

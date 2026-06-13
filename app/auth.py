@@ -14,6 +14,10 @@ def get_usuario_atual(token: str = Depends(oauth2_scheme)) -> dict:
         raise HTTPException(status_code=401, detail="Token inválido ou expirado")
     return payload
 
+def exigir_secretaria(payload: dict = Depends(get_usuario_atual)):
+    if not (payload["tipo"] == "secretaria"):
+        raise HTTPException(status_code=403, detail="Usuário sem permissão")
+
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -40,3 +44,4 @@ def verificar_token(token: str) -> dict:
         return payload
     except JWTError:
         return None
+

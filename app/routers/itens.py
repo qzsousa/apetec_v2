@@ -3,12 +3,13 @@ from app.models import Item, ItemUpdate
 from app.database import get_session
 from sqlmodel import Session, select
 from datetime import date
+from app.auth import get_usuario_atual, exigir_secretaria
 
 router = APIRouter(prefix="/item", tags=["Item"])
 
 # cadastra item na database
 @router.post("/", status_code = 201)
-def cadastrar_item(item: Item, session: Session = Depends(get_session)): #adcionar item na table item na database
+def cadastrar_item(item: Item, session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)): #adcionar item na table item na database
     item.data_entrada = date.today()
     session.add(item)
     session.commit()
@@ -17,7 +18,7 @@ def cadastrar_item(item: Item, session: Session = Depends(get_session)): #adcion
 
 #lista os itens da table item
 @router.get("/")
-def listar_itens (session: Session = Depends(get_session)): # listar todos os itens importando dados da database
+def listar_itens (session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)): # listar todos os itens importando dados da database
     itens = session.exec(select(Item)).all()
     return itens
 
@@ -31,7 +32,7 @@ def buscar_item(id: int, session: Session = Depends(get_session)):
 
 
 @router.put("/{id}")
-def atualizar_dados_item(dados: ItemUpdate, id: int, session: Session = Depends(get_session)):
+def atualizar_dados_item(dados: ItemUpdate, id: int, session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
     item = session.get(Item, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item não encontrado")
@@ -42,7 +43,7 @@ def atualizar_dados_item(dados: ItemUpdate, id: int, session: Session = Depends(
     return item
 
 @router.delete("/{id}", status_code=204)
-def deletar_item(id: int, session: Session = Depends(get_session)):
+def deletar_item(id: int, session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
     item = session.get(Item, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item não encontrado")

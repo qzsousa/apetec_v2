@@ -21,3 +21,4 @@ def login_secretaria(login_data: LoginSecretaria, session: Session = Depends(get
         raise HTTPException(status_code=401, detail="Credenciais inválidas")
     token = criar_token({"sub": secretaria.cpf, "tipo": "secretaria"})
     return {"access_token": token, "token_type": "bearer"}
+

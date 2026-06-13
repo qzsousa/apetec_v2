@@ -83,6 +83,7 @@ class UsuarioUpdate(SQLModel):
     telefone: Optional[str] = None
     email: Optional[str] = None
     turma_modulo: Optional[str] = None
+    senha: Optional[str] = None
 
 class ItemUpdate(SQLModel):
     marca: Optional[str] = None

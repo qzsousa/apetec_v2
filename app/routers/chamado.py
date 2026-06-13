@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from app.models import Chamado, ChamadoUpdate
+from app.models import Chamado, ChamadoUpdate, Secretaria
 from app.database import get_session
 from sqlmodel import Session, select
 from datetime import date, datetime
-from app.auth import get_usuario_atual
+from app.auth import exigir_secretaria, get_usuario_atual
 
 router = APIRouter(prefix="/chamados", tags=["Chamados"])
 
@@ -20,19 +20,23 @@ def cadastrar_chamado(chamado: Chamado, session: Session = Depends(get_session),
 
 @router.get("/")
 def listar_chamados(session: Session = Depends(get_session), usuario: dict = Depends(get_usuario_atual)):
-    cpf = usuario["sub"]
-    chamados = session.exec(select(Chamado).where(Chamado.cpf_usuario_usuario == cpf)).all() # filtra somente os chamados do usuario logado 
+    secretaria = usuario["tipo"] == "secretaria" #verifica se o usuario é secretaria
+    if not secretaria:
+        cpf = usuario["sub"]
+        chamados = session.exec(select(Chamado).where(Chamado.cpf_usuario_usuario == cpf)).all() # filtra somente os chamados do usuario logado 
+    else:
+        chamados = session.exec(select(Chamado)).all() # lista todos os chamados
     return chamados
 
 @router.get("/{id}")
-def buscar_chamado(id: int, session: Session = Depends(get_session)):
+def buscar_chamado(id: int, session: Session = Depends(get_session), usuario: dict = Depends(get_usuario_atual)):
     chamado = session.get(Chamado, id)
     if not chamado:
         raise HTTPException(status_code=404, detail="Chamado não encontrado")
     return chamado
 
 @router.put("/{id}")
-def atualizar_chamado(dados: ChamadoUpdate, id: int, session: Session = Depends(get_session)):
+def atualizar_chamado(dados: ChamadoUpdate, id: int, session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
     chamado = session.get(Chamado, id)
     if not chamado:
         raise HTTPException(status_code=404, detail="Chamado não encontrado")
@@ -42,7 +46,7 @@ def atualizar_chamado(dados: ChamadoUpdate, id: int, session: Session = Depends(
     return chamado
 
 @router.delete("/{id}", status_code=204)
-def deletar_chamado(id: int, session: Session = Depends(get_session)):
+def deletar_chamado(id: int, session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
     chamado = session.get(Chamado, id)
     if not chamado:
         raise HTTPException(status_code=404, detail="Chamado não encontrado")

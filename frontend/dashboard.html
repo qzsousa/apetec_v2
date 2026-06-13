@@ -118,7 +118,7 @@
   const tipo  = localStorage.getItem('tipo_usuario');
 
   // Se for secretaria, manda para o dashboard correto (quando existir)
-  // if (tipo === 'secretaria') window.location.href = 'dashboard-secretaria.html';
+  if (tipo === 'secretaria') window.location.href = 'dashboard-secretaria.html';
 
   carregarPerfil();
 
