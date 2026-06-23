@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from app.database import create_db_and_tables
 from app.routers import usuarios, itens, chamado, auth
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 app = FastAPI()
 
@@ -9,6 +11,12 @@ app.include_router(usuarios.router)
 app.include_router(itens.router)
 app.include_router(chamado.router)
 app.include_router(auth.router)
+
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+@app.get("/")
+def root():
+    return FileResponse("frontend/login.html")
 
 @app.on_event("startup")
 def on_startup():

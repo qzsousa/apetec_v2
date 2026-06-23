@@ -77,8 +77,8 @@
     if (!cpf || !senha) { mostrarErro('Preencha CPF e senha.'); return; }
 
     const url = tipoAtual === 'aluno' 
-    ? 'http://localhost:8000/auth/login/usuario'
-    : 'http://localhost:8000/auth/login/secretaria';
+    ? ''
+    : '';
 
     const body = { cpf, senha };
 

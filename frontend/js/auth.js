@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000" // URL base da API
+const API_URL = "" // URL base da API
 
 function salvarToken(token) {
     localStorage.setItem('token', token);
