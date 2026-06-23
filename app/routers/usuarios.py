@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, Depends, HTTPException
 from app.models import Usuario, UsuarioCreate, UsuarioUpdate
 from app.database import get_session
@@ -8,14 +10,14 @@ from app.auth import hash_senha, get_usuario_atual
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
-@router.post("/", status_code = 201) # cria usuario 
-def cadastrar_usuario(usuario: UsuarioCreate, session: Session = Depends(get_session)):
-    db_usuario = Usuario(**usuario.model_dump())
-    db_usuario.senha = hash_senha(db_usuario.senha)
-    session.add(db_usuario)
-    session.commit()
-    session.refresh(db_usuario)
-    return db_usuario
+
+def senha_valida(senha: str) -> bool:
+    return (
+        len(senha) >= 8 and
+        bool(re.search(r'[A-Z]', senha)) and
+        bool(re.search(r'[0-9]', senha)) and
+        bool(re.search(r'[!@#$%^&*(),.?":{}|<>]', senha))
+    )
 
 @router.get("/")
 def listar_usuarios(session: Session = Depends(get_session)):
@@ -38,6 +40,19 @@ def buscar_usuario(cpf: str, session: Session = Depends(get_session)):
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado") # aqui ele verifica se o usuario foi encontrado, ou seja, se o usuario for None, ele levanta uma exceção HTTPException com status code 404 e uma mensagem de detalhe "Usuário não encontrado", ou seja, ele infocpfa que o usuario não existe no banco de dados
     return usuario
+  
+@router.post("/", status_code=201) # cria usuario
+def cadastrar_usuario(usuario: UsuarioCreate, session: Session = Depends(get_session)):
+    if session.get(Usuario, usuario.cpf):
+        raise HTTPException(status_code=400, detail="CPF já cadastrado")
+    if not senha_valida(usuario.senha):
+        raise HTTPException(status_code=400, detail="A senha não atende aos requisitos mínimos")
+    db_usuario = Usuario(**usuario.model_dump())
+    db_usuario.senha = hash_senha(db_usuario.senha)
+    session.add(db_usuario)
+    session.commit()
+    session.refresh(db_usuario)
+    return db_usuario
 
 @router.put("/{cpf}")
 def atualizar_dados_usuario(dados: UsuarioUpdate, cpf: str, session: Session = Depends(get_session)):

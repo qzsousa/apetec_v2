@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apetec - Recuperar Senha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Anonymous+Pro&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style/style.css">
+</head>
+<body>
+
+<div class="background">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<div class="card">
+
+  <!-- Indicador de etapas -->
+  <div class="etapas">
+    <div class="etapa-circulo ativo" id="circulo-1">1</div>
+    <div class="etapa-linha" id="linha-1"></div>
+    <div class="etapa-circulo" id="circulo-2">2</div>
+    <div class="etapa-linha" id="linha-2"></div>
+    <div class="etapa-circulo" id="circulo-3">3</div>
+  </div>
+
+  <!-- ── ETAPA 1: E-mail ── -->
+  <div class="secao ativa" id="secao-1">
+    <h2 class="card-titulo">Recuperar senha</h2>
+    <p class="card-sub">Digite seu e-mail cadastrado. Enviaremos um código de 6 dígitos.</p>
+
+    <div class="form-grupo">
+      <label for="input-email">E-mail</label>
+      <input type="email" id="input-email" placeholder="seu@email.com">
+    </div>
+
+    <div class="msg" id="msg-1"></div>
+
+    <div class="btns">
+      <button class="btn-primario" onclick="enviarCodigo()">Enviar código</button>
+      <button class="btn-secundario" onclick="window.location.href='login.html'">Voltar</button>
+    </div>
+  </div>
+
+  <!-- ── ETAPA 2: Código ── -->
+  <div class="secao" id="secao-2">
+    <h2 class="card-titulo">Digite o código</h2>
+    <p class="card-sub">Enviamos um código de 6 dígitos para <strong id="email-exibido"></strong>. Verifique sua caixa de entrada.</p>
+
+    <div class="form-grupo">
+      <label for="input-codigo">Código</label>
+      <input type="text" id="input-codigo" class="input-codigo" placeholder="000000" maxlength="6">
+    </div>
+
+    <div class="msg" id="msg-2"></div>
+
+    <div class="timer" id="timer-texto">
+      Código válido por <span id="timer-contador">15:00</span>
+    </div>
+
+    <div class="btns" style="margin-top: 16px;">
+      <button class="btn-primario" onclick="verificarCodigo()">Verificar</button>
+      <button class="btn-secundario" onclick="reenviarCodigo()">Reenviar</button>
+    </div>
+  </div>
+
+  <!-- ── ETAPA 3: Nova senha ── -->
+  <div class="secao" id="secao-3">
+    <h2 class="card-titulo">Nova senha</h2>
+    <p class="card-sub">Escolha uma nova senha para sua conta.</p>
+
+    <div class="form-grupo">
+      <label for="input-nova-senha">Nova senha</label>
+      <input type="password" id="input-nova-senha" placeholder="••••••••">
+    </div>
+
+    <div class="form-grupo">
+      <label for="input-confirmar-senha">Confirmar senha</label>
+      <input type="password" id="input-confirmar-senha" placeholder="••••••••">
+    </div>
+
+    <div class="msg" id="msg-3"></div>
+
+    <div class="btns unico" style="margin-top: 8px;">
+      <button class="btn-primario" onclick="resetarSenha()">Salvar nova senha</button>
+    </div>
+  </div>
+
+  <!-- ── ETAPA 4: Sucesso ── -->
+  <div class="secao" id="secao-sucesso">
+    <div class="sucesso-icone">✦</div>
+    <h2 class="card-titulo" style="text-align:center;">Senha alterada!</h2>
+    <p class="card-sub" style="text-align:center;">Sua senha foi atualizada com sucesso. Você já pode fazer login.</p>
+
+    <div class="btns unico" style="margin-top: 8px;">
+      <button class="btn-primario" onclick="window.location.href='login.html'">Ir para o login</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="rodape">Apetec · Sistema de Achados e Perdidos Escolar</p>
+
+<script>
+  const API_URL = 'http://localhost:8000';
+  let emailAtual = '';
+  let codigoAtual = '';
+  let timerInterval = null;
+
+  // ── Navegação entre etapas ──
+  function irParaEtapa(etapa) {
+    document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
+    document.getElementById('secao-' + etapa).classList.add('ativa');
+    atualizarIndicador(etapa);
+  }
+
+  function atualizarIndicador(etapaAtual) {
+    for (let i = 1; i <= 3; i++) {
+      const circulo = document.getElementById('circulo-' + i);
+      circulo.classList.remove('ativo', 'completo');
+      if (i < etapaAtual) circulo.classList.add('completo'), circulo.textContent = '✓';
+      else if (i === etapaAtual) circulo.classList.add('ativo'), circulo.textContent = i;
+      else circulo.textContent = i;
+    }
+    for (let i = 1; i <= 2; i++) {
+      const linha = document.getElementById('linha-' + i);
+      linha.classList.toggle('completo', i < etapaAtual);
+    }
+  }
+
+  // ── Etapa 1: Enviar código ──
+  async function enviarCodigo() {
+    const email = document.getElementById('input-email').value.trim();
+    if (!email || !email.includes('@')) {
+      mostrarMsg('msg-1', 'Digite um e-mail válido.', 'erro');
+      return;
+    }
+
+    const btn = document.querySelector('#secao-1 .btn-primario');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    try {
+      const res = await fetch(API_URL + '/auth/recuperar-senha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        mostrarMsg('msg-1', data.detail || 'E-mail não encontrado.', 'erro');
+        btn.disabled = false;
+        btn.textContent = 'Enviar código';
+        return;
+      }
+
+      emailAtual = email;
+      document.getElementById('email-exibido').textContent = email;
+      iniciarTimer(15 * 60); // 15 minutos
+      irParaEtapa(2);
+
+    } catch {
+      mostrarMsg('msg-1', 'Erro ao conectar com o servidor.', 'erro');
+      btn.disabled = false;
+      btn.textContent = 'Enviar código';
+    }
+  }
+
+  // ── Etapa 2: Verificar código ──
+  async function verificarCodigo() {
+    const codigo = document.getElementById('input-codigo').value.trim();
+    if (codigo.length !== 6) {
+      mostrarMsg('msg-2', 'O código deve ter 6 dígitos.', 'erro');
+      return;
+    }
+
+    try {
+      const res = await fetch(API_URL + '/auth/verificar-codigo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailAtual, codigo })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        mostrarMsg('msg-2', data.detail || 'Código inválido ou expirado.', 'erro');
+        return;
+      }
+
+      codigoAtual = codigo;
+      clearInterval(timerInterval);
+      irParaEtapa(3);
+
+    } catch {
+      mostrarMsg('msg-2', 'Erro ao conectar com o servidor.', 'erro');
+    }
+  }
+
+  // ── Etapa 2: Reenviar código ──
+  async function reenviarCodigo() {
+    try {
+      const res = await fetch(API_URL + '/auth/recuperar-senha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailAtual })
+      });
+
+      if (res.ok) {
+        mostrarMsg('msg-2', 'Novo código enviado!', 'sucesso');
+        clearInterval(timerInterval);
+        iniciarTimer(15 * 60);
+        document.getElementById('input-codigo').value = '';
+      } else {
+        mostrarMsg('msg-2', 'Erro ao reenviar código.', 'erro');
+      }
+    } catch {
+      mostrarMsg('msg-2', 'Erro ao conectar com o servidor.', 'erro');
+    }
+  }
+
+  // ── Etapa 3: Resetar senha ──
+  async function resetarSenha() {
+    const nova = document.getElementById('input-nova-senha').value;
+    const confirmar = document.getElementById('input-confirmar-senha').value;
+
+    if (!nova || nova.length < 6) {
+      mostrarMsg('msg-3', 'A senha deve ter pelo menos 6 caracteres.', 'erro');
+      return;
+    }
+    if (nova !== confirmar) {
+      mostrarMsg('msg-3', 'As senhas não coincidem.', 'erro');
+      return;
+    }
+
+    try {
+      const res = await fetch(API_URL + '/auth/resetar-senha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailAtual, codigo: codigoAtual, nova_senha: nova })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        mostrarMsg('msg-3', data.detail || 'Erro ao resetar senha.', 'erro');
+        return;
+      }
+
+      // Sucesso — mostra tela final
+      document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
+      document.getElementById('secao-sucesso').classList.add('ativa');
+      document.querySelector('.etapas').style.display = 'none';
+
+    } catch {
+      mostrarMsg('msg-3', 'Erro ao conectar com o servidor.', 'erro');
+    }
+  }
+
+  // ── Timer ──
+  function iniciarTimer(segundos) {
+    let restante = segundos;
+    atualizarTextoTimer(restante);
+
+    timerInterval = setInterval(() => {
+      restante--;
+      atualizarTextoTimer(restante);
+      if (restante <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById('timer-texto').innerHTML = 'Código expirado. <span style="color:#ffaaaa">Reenvie.</span>';
+      }
+    }, 1000);
+  }
+
+  function atualizarTextoTimer(segundos) {
+    const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+    const seg = String(segundos % 60).padStart(2, '0');
+    document.getElementById('timer-contador').textContent = `${min}:${seg}`;
+  }
+
+  // ── Helper ──
+  function mostrarMsg(id, texto, tipo) {
+    const el = document.getElementById(id);
+    el.textContent = texto;
+    el.className = 'msg ' + tipo;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
+  }
+
+  // Só aceita números no campo de código
+  document.getElementById('input-codigo').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '');
+  });
+
+  // Enter avança a etapa atual
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const etapaAtiva = document.querySelector('.secao.ativa').id;
+    if (etapaAtiva === 'secao-1') enviarCodigo();
+    if (etapaAtiva === 'secao-2') verificarCodigo();
+    if (etapaAtiva === 'secao-3') resetarSenha();
+  });
+</script>
+
+</body>
+</html>

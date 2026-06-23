@@ -79,11 +79,20 @@
 
    <div class="form-grupo">
   <label for="input-senha">Senha</label>
-  <div class="input-com-icone">
-    <input type="password" id="input-senha" placeholder="••••••••">
-    <button type="button" class="btn-olho" onclick="toggleSenha('input-senha', this)">
-  <i class="fas fa-eye"></i>
-</button>
+  <input type="password" id="input-senha" placeholder="••••••••" oninput="verificarSenha()">
+  
+  <!-- Barra de força -->
+  <div class="forca-barra">
+    <div class="forca-preenchimento" id="forca-preenchimento"></div>
+  </div>
+
+  <!-- Checklist de regras -->
+  <div class="regras-senha" id="regras-senha">
+    <span id="regra-tamanho">✗ Mínimo 8 caracteres</span>
+    <span id="regra-maiuscula">✗ Letra maiúscula</span>
+    <span id="regra-numero">✗ Número</span>
+    <span id="regra-simbolo">✗ Símbolo (!@#$...)</span>
+  </div>
 </div>
 
   <div class="msg" id="msg"></div>
@@ -111,6 +120,37 @@
     // Permite letras (com e sem acento) e espaços. Remove números e símbolos.
     this.value = this.value.replace(/[^a-zA-ZÀ-ÿ ]/g, '');
   });
+  function verificarSenha() {
+  const senha = document.getElementById('input-senha').value;
+
+  const regras = {
+    tamanho:  senha.length >= 8,
+    maiuscula: /[A-Z]/.test(senha),
+    numero:   /[0-9]/.test(senha),
+    simbolo:  /[!@#$%^&*(),.?":{}|<>]/.test(senha)
+  };
+
+  // Atualiza cada item do checklist
+  Object.entries(regras).forEach(([chave, ok]) => {
+    const el = document.getElementById('regra-' + chave);
+    el.classList.toggle('ok', ok);
+    el.textContent = (ok ? '✓ ' : '✗ ') + {
+      tamanho:  'Mínimo 8 caracteres',
+      maiuscula: 'Letra maiúscula',
+      numero:   'Número',
+      simbolo:  'Símbolo (!@#$...)'
+    }[chave];
+  });
+
+  // Calcula força (0 a 4)
+  const forca = Object.values(regras).filter(Boolean).length;
+  const cores = ['', '#ef4444', '#f97316', '#f0c31f', '#86efac'];
+  const larguras = ['0%', '25%', '50%', '75%', '100%'];
+
+  const barra = document.getElementById('forca-preenchimento');
+  barra.style.width = larguras[forca];
+  barra.style.background = cores[forca];
+}
 
     function mascaraCPF(i){
    
@@ -199,11 +239,26 @@
         mostrarMensagem('Erro ao cadastrar. Verifique os dados.', 'erro');
         return;
     }
+    function senhaValida(senha) {
+    return senha.length >= 8 &&
+    /[A-Z]/.test(senha) &&
+    /[0-9]/.test(senha) &&
+    /[!@#$%^&*(),.?":{}|<>]/.test(senha);
+  }
 
+// dentro de cadastrar(), antes do body:
+if (!senhaValida(document.getElementById('input-senha').value)) {
+  mostrarMensagem('A senha não atende aos requisitos mínimos.', 'erro');
+  return;
+}
     // só aparece se deu 201
     document.getElementById('register-container').style.display = 'none';
     document.getElementById('mensagem_sucesso').style.display = 'flex';
-
+    if (!res.ok) {
+    const data = await res.json();
+    mostrarMensagem(data.detail || 'Erro ao cadastrar. Verifique os dados.', 'erro');
+    return;
+}
 } catch {
     mostrarMensagem('Erro ao conectar com o servidor.', 'erro');
 }
