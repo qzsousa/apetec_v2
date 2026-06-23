@@ -38,3 +38,4 @@ function chamarAPI(url, metodo, body = null) {
 
     return fetch(API_URL + url, opcoes); // retorna a promise do fetch
 }
+

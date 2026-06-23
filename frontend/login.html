@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Anonymous+Pro&display=swap" rel="stylesheet">
   <script src="./js/auth.js"></script>
   <link rel="stylesheet" href="./style/style.css">
+  <link rel="stylesheet" href="https://cloudflare.com">
 </head>
 <body>
 
@@ -35,9 +36,13 @@
   </div>
 
   <div class="form-grupo">
-    <label for="input-senha">Senha</label>
+  <label for="input-senha">Senha</label>
+  <div class="input-com-icone">
     <input type="password" id="input-senha" placeholder="••••••••">
-  </div>
+    <button type="button" class="btn-olho" onclick="toggleSenha('input-senha', this)">
+  <i class="fas fa-eye"></i>
+</button>
+</div>
 
   <div class="msg-erro" id="msg-erro"></div>
 
@@ -99,6 +104,15 @@
   }
 
   document.addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
+
+ function toggleSenha(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  btn.innerHTML = isPassword
+    ? '<i class="fas fa-eye-slash"></i>'  // agora está visível, mostra olho cortado
+    : '<i class="fas fa-eye"></i>';       // voltou a ficar oculto, mostra olho aberto
+}
 </script>
 
 </body>
