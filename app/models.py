@@ -2,7 +2,7 @@ from typing import Optional #define se o campo é obrigatório ou não
 from sqlmodel import SQLModel, Field #field define a regra do campo, ou seja, se ele é pk, valor padrão, tamanho minimo
 from enum import Enum #enum é para criar um tipo de dado com opções pré-definidas
 from pydantic import EmailStr #valida se o campo é um email válido
-from datetime import date # importa a date
+from datetime import date, datetime # importa a date
 
 
 
@@ -78,6 +78,13 @@ class UsuarioCreate(SQLModel):
     cargo: CargoEnum
     senha: str
 
+class TokenRecuperacao(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    email: str                          # e-mail do usuário
+    codigo: str                         # 6 dígitos gerados
+    expiracao: datetime                 # agora + 15 minutos
+    usado: bool = Field(default=False)  # True após uso, para invalidar
+
 class UsuarioUpdate(SQLModel):
     nome: Optional[str] = None
     telefone: Optional[str] = None
@@ -112,3 +119,23 @@ class LoginSecretaria(SQLModel):
     cpf: str
     senha: str
 
+class TokenRecuperacao(SQLModel, table=True):
+    __table_args__ = {"extend_existing": True}  # adiciona essa linha
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    email: str
+    codigo: str
+    expiracao: datetime
+    usado: bool = Field(default=False)
+
+class SolicitarRecuperacao(SQLModel):
+    email: str
+
+class VerificarCodigo(SQLModel):
+    email: str
+    codigo: str
+
+class ResetarSenha(SQLModel):
+    email: str
+    codigo: str
+    nova_senha: str
