@@ -1,14 +1,20 @@
-from sqlmodel import SQLModel, Session, create_engine 
+from sqlmodel import SQLModel, Session, create_engine
+import os
+from dotenv import load_dotenv
 
-DATABASE_URL = "sqlite:///./database.db" # aqui salva o endereço do banco de dados
+load_dotenv()
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False}) # aqui cria a conexão, a chave para abrir o banco de dados
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./database.db")
 
-# função para criar tabelas quando o servidor subir
-def create_db_and_tables(): 
-    SQLModel.metadata.create_all(engine) # aqui ele mostra a rota aonde deve passar, usa o engine como chave para registrar no .db
+# O Render fornece URLs postgres://, mas SQLAlchemy exige postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-# função para criar a session 
-def get_session(): 
+engine = create_engine(DATABASE_URL)
+
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
+def get_session():
     with Session(engine) as session:
-        yield session # antes do yield é abrir a sessão, depois é fechar
+        yield session
