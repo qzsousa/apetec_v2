@@ -12,7 +12,7 @@ app.include_router(itens.router)
 app.include_router(chamado.router)
 app.include_router(auth.router)
 
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 
 @app.get("/")
 def root():
@@ -24,7 +24,7 @@ def on_startup():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5500", "http://127.0.0.1:5500"],  # origem do seu frontend
+    allow_origins=["http://localhost:5500", "http://127.0.0.1:5500", "https://apetec-v2.onrender.com"],  # origem do seu frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
