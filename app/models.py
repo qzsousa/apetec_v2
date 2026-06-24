@@ -59,7 +59,7 @@ class Chamado (SQLModel, table=True):
     data_perda: date
     local_perda: str
     status: str
-    cpf_usuario_usuario: int = Field(foreign_key="usuario.cpf")
+    cpf_usuario_usuario: str = Field(foreign_key="usuario.cpf")
     id_item: Optional[int] = Field(default=None, foreign_key="item.id")
 
 class Secretaria(SQLModel, table=True):
@@ -108,7 +108,7 @@ class ChamadoUpdate(SQLModel):
     data_perda: Optional[date] = None
     local_perda: Optional[str] = None
     status: Optional[str] = None
-    cpf_usuario: Optional[int] = None
+    cpf_usuario: Optional[str] = None
     id_item: Optional[int] = None
 
 class LoginUsuario(SQLModel):

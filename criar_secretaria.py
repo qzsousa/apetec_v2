@@ -1,16 +1,26 @@
-import sqlite3
-from passlib.hash import bcrypt
+from sqlmodel import Session, create_engine
+from app.models import Secretaria
+from app.auth import hash_senha
+from dotenv import load_dotenv
+import os
 
-conexao = sqlite3.connect("database.db")
+load_dotenv()
 
-cursor = conexao.cursor()
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./database.db")
 
-sql = "INSERT INTO secretaria (cpf, nome, telefone, email, senha) VALUES (?, ?, ?, ?, ?)"
-dados = ("47266774896", "Pablo Nascimento Vieira de Sousa", "11952437282", "nascpablo1709@gmail.com", bcrypt.hash("thuane2405"))
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-cursor.execute(sql, dados)
+engine = create_engine(DATABASE_URL)
 
-conexao.commit()
-
-cursor.close()
-conexao.close()
+with Session(engine) as session:
+    secretaria = Secretaria(
+        cpf="47266774896",
+        nome="Pablo Nascimento Vieira de Sousa",
+        email="nascpablo1709@gmail.com",
+        telefone="11952437282",
+        senha=hash_senha("thuane2405")
+    )
+    session.add(secretaria)
+    session.commit()
+    print("Secretaria criada com sucesso!")
