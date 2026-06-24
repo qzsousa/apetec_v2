@@ -77,13 +77,13 @@
     if (!cpf || !senha) { mostrarErro('Preencha CPF e senha.'); return; }
 
     const url = tipoAtual === 'aluno' 
-    ? ''
-    : '';
+    ? '/auth/login/usuario'
+    : '/auth/login/secretaria';
 
     const body = { cpf, senha };
 
     try {
-      const res  = await fetch(url, {
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
