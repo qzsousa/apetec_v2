@@ -94,3 +94,20 @@ def resetar_senha(dados: ResetarSenha, session: Session = Depends(get_session)):
     session.commit()
 
     return {"mensagem": "Senha resetada com sucesso"}
+
+@router.post("/setup/secretaria")
+def criar_secretaria(session: Session = Depends(get_session)):
+    senha_master = os.getenv("SETUP_KEY")
+    if not senha_master:
+        raise HTTPException(status_code=403, detail="Rota desativada")
+    
+    secretaria = Secretaria(
+        cpf="47266774896",
+        nome="Pablo Nascimento Vieira de Sousa",
+        email="nascpablo1709@gmail.com",
+        telefone="11952437282",
+        senha=hash_senha("thuane2405")
+    )
+    session.add(secretaria)
+    session.commit()
+    return {"mensagem": "Secretaria criada com sucesso!"}
