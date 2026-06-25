@@ -91,9 +91,15 @@
       const data = await res.json();
       if (!res.ok) { mostrarErro('Credenciais inválidas. Tente novamente.'); return; }
 
-      localStorage.setItem('token', data.access_token);
-      localStorage.setItem('tipo_usuario', tipoAtual);
-      window.location.href = 'dashboard.html';
+     localStorage.setItem('token', data.access_token);
+     localStorage.setItem('tipo_usuario', tipoAtual);
+
+      // Redireciona para o dashboard correto
+    if (tipoAtual === 'secretaria') {
+          window.location.href = 'dashboard-secretaria.html';
+    } else {
+          window.location.href = 'dashboard.html';
+    }
     } catch {
       mostrarErro('Erro ao conectar com o servidor.');
     }
