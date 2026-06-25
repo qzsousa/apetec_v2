@@ -197,6 +197,13 @@
     valor = valor.replace(/(\d)(\d{4})$/, '$1-$2'); // Coloca hífen entre o quarto e o quinto dígitos
     e.target.value = valor;
     });
+    
+     function senhaValida(senha) {
+    return senha.length >= 8 &&
+    /[A-Z]/.test(senha) &&
+    /[0-9]/.test(senha) &&
+    /[!@#$%^&*(),.?":{}|<>]/.test(senha);
+  }
 
   async function cadastrar() {
 
@@ -226,11 +233,6 @@
       mostrarMensagem('Digite um e-mail válido.', 'erro');
       return;
     }
-  if (!senhaValida(body.senha)) {
-      mostrarMensagem('A senha não atende aos requisitos mínimos.', 'erro');
-      return;
-    }
-
     try {
     const res  = await fetch('/usuarios/', {
         method: 'POST',
@@ -243,18 +245,12 @@
         mostrarMensagem('Erro ao cadastrar. Verifique os dados.', 'erro');
         return;
     }
-    function senhaValida(senha) {
-    return senha.length >= 8 &&
-    /[A-Z]/.test(senha) &&
-    /[0-9]/.test(senha) &&
-    /[!@#$%^&*(),.?":{}|<>]/.test(senha);
-  }
-
-// dentro de cadastrar(), antes do body:
-if (!senhaValida(document.getElementById('input-senha').value)) {
-  mostrarMensagem('A senha não atende aos requisitos mínimos.', 'erro');
-  return;
-}
+   
+    // dentro de cadastrar(), antes do body:
+    if (!senhaValida(document.getElementById('input-senha').value)) {
+      mostrarMensagem('A senha não atende aos requisitos mínimos.', 'erro');
+      return;
+    }
     // só aparece se deu 201
     document.getElementById('register-container').style.display = 'none';
     document.getElementById('mensagem_sucesso').style.display = 'flex';
