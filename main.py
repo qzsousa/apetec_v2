@@ -18,6 +18,22 @@ app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 def root():
     return FileResponse("frontend/login.html")
 
+@app.get("/dashboard.html")
+def dashboard():
+    return FileResponse("frontend/dashboard.html")
+
+@app.get("/register.html")
+def register():
+    return FileResponse("frontend/register.html")
+
+@app.get("/recuperar-senha.html")
+def recuperar_senha_page():
+    return FileResponse("frontend/recuperar-senha.html")
+
+@app.get("/dashboard-secretaria.html")
+def dashboard_secretaria():
+    return FileResponse("frontend/dashboard-secretaria.html")
+
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
