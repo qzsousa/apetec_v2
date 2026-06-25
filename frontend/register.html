@@ -226,6 +226,10 @@
       mostrarMensagem('Digite um e-mail válido.', 'erro');
       return;
     }
+  if (!senhaValida(body.senha)) {
+      mostrarMensagem('A senha não atende aos requisitos mínimos.', 'erro');
+      return;
+    }
 
     try {
     const res  = await fetch('/usuarios/', {

@@ -14,8 +14,8 @@ app.include_router(auth.router)
 
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 
-@app.get("/")
-def root():
+@app.get("/login.html")
+def login():
     return FileResponse("frontend/login.html")
 
 @app.get("/dashboard.html")
