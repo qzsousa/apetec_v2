@@ -1,5 +1,16 @@
 const API_URL = "" // URL base da API
 
+function toggleSenha(idCampo, botao) {
+  const campo = document.getElementById(idCampo);
+  const icone = botao.querySelector("i");
+  const escondida = campo.type === "password";
+
+  campo.type = escondida ? "text" : "password";
+  icone.classList.toggle("fa-eye", !escondida);
+  icone.classList.toggle("fa-eye-slash", escondida);
+  botao.setAttribute("aria-label", escondida ? "Ocultar senha" : "Mostrar senha");
+}
+
 function salvarToken(token) {
     localStorage.setItem('token', token);
 }

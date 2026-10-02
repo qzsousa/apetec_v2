@@ -75,7 +75,7 @@
       border-right: 2px solid rgba(255,255,255,0.75);
       width: 0;
       animation:
-        typewriter 1.8s steps(30) 0.4s forwards,
+        typewriter 2.0s steps(30) 0.2s forwards,
         blinkCursor 600ms steps(1) infinite;
       font-size: 28px;
       font-weight: 600;
@@ -884,6 +884,10 @@
 }
 
 .btn-olho:hover { color: rgba(255,255,255,0.8); }
+
+.dash-card .input-com-icone input {
+  padding-right: 42px;
+}
 
  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 

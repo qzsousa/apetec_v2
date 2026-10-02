@@ -5,8 +5,15 @@ from dotenv import load_dotenv
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import os
+import re
+
+def normalizar_cpf(cpf: str) -> str:
+    return re.sub(r"\D", "", cpf)
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login/usuario")
+
+
 
 def get_usuario_atual(token: str = Depends(oauth2_scheme)) -> dict:
     payload = verificar_token(token)
@@ -21,6 +28,7 @@ def exigir_secretaria(payload: dict = Depends(get_usuario_atual)):
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
+print("DEBUG SECRET_KEY:", repr(SECRET_KEY))
 ALGORITHM = "HS256"
 EXPIRACAO_MINUTOS = 60
 

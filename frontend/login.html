@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/frontend/style/style.css">
   <script src="/frontend/js/auth.js"></script>
   <link rel="stylesheet" href="https://cloudflare.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
 
@@ -39,9 +40,10 @@
   <label for="input-senha">Senha</label>
   <div class="input-com-icone">
     <input type="password" id="input-senha" placeholder="••••••••">
-    <button type="button" class="btn-olho" onclick="toggleSenha('input-senha', this)">
-  <i class="fas fa-eye"></i>
-</button>
+    <button type="button" class="btn-olho" onclick="toggleSenha('input-senha', this)" aria-label="Mostrar senha">
+      <i class="fas fa-eye"></i>
+    </button>
+  </div>
 </div>
 
   <div class="msg-erro" id="msg-erro"></div>

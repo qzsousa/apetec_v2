@@ -1,10 +1,12 @@
 import re
+from app.auth import normalizar_cpf
 
 from fastapi import APIRouter, Depends, HTTPException
 from app.models import Usuario, UsuarioCreate, UsuarioUpdate
 from app.database import get_session
 from sqlmodel import Session, select
 from app.auth import hash_senha, get_usuario_atual
+
 
 
 
@@ -36,6 +38,7 @@ def meu_perfil(session: Session = Depends(get_session), usuario_atual: dict = De
 
 @router.get("/{cpf}")
 def buscar_usuario(cpf: str, session: Session = Depends(get_session)):
+    usuario.cpf = normalizar_cpf(usuario.cpf)
     usuario = session.get(Usuario, cpf) # aqui ele busca o usuario pelo cpf, ou seja, ele procura o usuario com o cpf especificado e retorna o objeto Usuario correspondente, ou seja, ele retorna o usuario encontrado no banco de dados
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado") # aqui ele verifica se o usuario foi encontrado, ou seja, se o usuario for None, ele levanta uma exceção HTTPException com status code 404 e uma mensagem de detalhe "Usuário não encontrado", ou seja, ele infocpfa que o usuario não existe no banco de dados
@@ -43,6 +46,7 @@ def buscar_usuario(cpf: str, session: Session = Depends(get_session)):
   
 @router.post("/", status_code=201) # cria usuario
 def cadastrar_usuario(usuario: UsuarioCreate, session: Session = Depends(get_session)):
+    usuario.cpf = normalizar_cpf(usuario.cpf)
     if session.get(Usuario, usuario.cpf):
         raise HTTPException(status_code=400, detail="CPF já cadastrado")
     if not senha_valida(usuario.senha):
@@ -56,6 +60,7 @@ def cadastrar_usuario(usuario: UsuarioCreate, session: Session = Depends(get_ses
 
 @router.put("/{cpf}")
 def atualizar_dados_usuario(dados: UsuarioUpdate, cpf: str, session: Session = Depends(get_session)):
+    usuario.cpf = normalizar_cpf(usuario.cpf)
     usuario = session.get(Usuario, cpf) # aqui ele busca o usuario pelo cpf, ou seja, ele procura o usuario com o cpf especificado e retorna o objeto Usuario correspondente, ou seja, ele retorna o usuario encontrado no banco de dados
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado") # aqui ele verifica se o usuario foi encontrado, ou seja, se o usuario for None, ele levanta uma exceção HTTPException com status code 404 e uma mensagem de detalhe "Usuário não encontrado", ou seja, ele infocpfa que o usuario não existe no banco de dados
