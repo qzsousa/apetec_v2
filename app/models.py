@@ -186,3 +186,16 @@ class SecretariaPublic(SQLModel):
     nome: str
     email: str
     telefone: str
+
+
+class Mensagem(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    id_chamado: int = Field(foreign_key="chamado.id", index=True)
+    autor_tipo: str  # "usuario" | "secretaria"
+    autor_cpf: str
+    texto: str
+    criado_em: datetime = Field(default_factory=datetime.utcnow)
+
+
+class MensagemCreate(SQLModel):
+    texto: str

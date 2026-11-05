@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from app.models import Chamado, ChamadoUpdate, ChamadoStatusEnum, Item, ItemStatusEnum, Usuario
+from app.models import Chamado, ChamadoUpdate, ChamadoStatusEnum, Item, ItemStatusEnum, Usuario, Mensagem, MensagemCreate
 from app.database import get_session
 from sqlmodel import Session, select
 from datetime import datetime
@@ -66,7 +66,7 @@ def buscar_chamado(id: int, session: Session = Depends(get_session), usuario: di
     chamado = session.get(Chamado, id)
     if not chamado:
         raise HTTPException(status_code=404, detail="Chamado não encontrado")
-    if not (is_secretaria(usuario) or chamado.cpf_usuario_usuario == usuario.get("sub")):
+    if not (is_secretaria(usuario) or str(chamado.cpf_usuario_usuario) == str(usuario.get("sub"))):
         raise HTTPException(status_code=403, detail="Usuário sem permissão")
     return chamado
 
@@ -170,6 +170,32 @@ def entregar_item(id: int, payload: dict, session: Session = Depends(get_session
     session.commit()
     session.refresh(chamado)
     return chamado
+
+
+@router.get("/{id}/mensagens")
+def listar_mensagens(id: int, session: Session = Depends(get_session), usuario: dict = Depends(get_usuario_atual)):
+    chamado = session.get(Chamado, id)
+    if not chamado:
+        raise HTTPException(status_code=404, detail="Chamado não encontrado")
+    if not (is_secretaria(usuario) or str(chamado.cpf_usuario_usuario) == str(usuario.get("sub"))):
+        raise HTTPException(status_code=403, detail="Usuário sem permissão")
+    msgs = session.exec(select(Mensagem).where(Mensagem.id_chamado == id).order_by(Mensagem.criado_em)).all()
+    return msgs
+
+
+@router.post("/{id}/mensagens", status_code=201)
+def enviar_mensagem(id: int, dados: MensagemCreate, session: Session = Depends(get_session), usuario: dict = Depends(get_usuario_atual)):
+    chamado = session.get(Chamado, id)
+    if not chamado:
+        raise HTTPException(status_code=404, detail="Chamado não encontrado")
+    if not (is_secretaria(usuario) or str(chamado.cpf_usuario_usuario) == str(usuario.get("sub"))):
+        raise HTTPException(status_code=403, detail="Usuário sem permissão")
+    tipo = "secretaria" if is_secretaria(usuario) else "usuario"
+    msg = Mensagem(id_chamado=id, autor_tipo=tipo, autor_cpf=usuario["sub"], texto=dados.texto)
+    session.add(msg)
+    session.commit()
+    session.refresh(msg)
+    return msg
 
 
 @router.delete("/{id}", status_code=204)

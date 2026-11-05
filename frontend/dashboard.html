@@ -115,6 +115,19 @@
 
 <p class="rodape">Apetec · Sistema de Achados e Perdidos Escolar</p>
 
+<!-- Modal de chat -->
+<div id="modal-chat" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:24px;max-width:500px;width:90%;max-height:80vh;display:flex;flex-direction:column;color:#fff;">
+    <h3 style="margin-bottom:12px;">Conversa</h3>
+    <div id="chat-lista" style="flex:1;overflow:auto;min-height:200px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;margin-bottom:8px;"></div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="chat-texto" placeholder="Mensagem..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#fff;">
+      <button class="btn-primario" onclick="enviarMensagemChat()">Enviar</button>
+    </div>
+    <button class="btn-secundario" style="margin-top:8px;" onclick="fecharChat()">Fechar</button>
+  </div>
+</div>
+
 <script src="/frontend/js/auth.js?v=8"></script>
 <script>
 
@@ -195,7 +208,10 @@
             ${c._item.fotoUrl ? `<img src="${escapeHtml(c._item.fotoUrl)}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;margin-top:4px;">` : ''}` : ''}
             ${c.status === 'respondido' ? '<span class="chamado-detalhe" style="color:#FFD700">Pronto para retirada na secretaria.</span>' : ''}
           </div>
-          <span class="badge ${escapeHtml(c.status)}">${escapeHtml(labelStatus(c.status))}</span>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <span class="badge ${escapeHtml(c.status)}">${escapeHtml(labelStatus(c.status))}</span>
+            <button class="btn-secundario" onclick="abrirChat(${escapeHtml(c.id)})">Conversar</button>
+          </div>
         </div>
       `).join('');
     } catch {
@@ -248,6 +264,53 @@
     if (!data) return '—';
     const [ano, mes, dia] = data.split('-');
     return `${dia}/${mes}/${ano}`;
+  }
+
+  let chatChamadoAtual = null;
+  async function abrirChat(id) {
+    chatChamadoAtual = id;
+    document.getElementById('modal-chat').style.display = 'flex';
+    await carregarMensagens();
+  }
+  function fecharChat() {
+    document.getElementById('modal-chat').style.display = 'none';
+    chatChamadoAtual = null;
+  }
+  async function carregarMensagens() {
+    const lista = document.getElementById('chat-lista');
+    lista.innerHTML = 'Carregando...';
+    try {
+      const res = await chamarAPI(`/chamados/${chatChamadoAtual}/mensagens`, 'GET');
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        lista.innerHTML = '<p class="estado-vazio">Nenhuma mensagem ainda.</p>';
+        return;
+      }
+      lista.innerHTML = data.map(m => `
+        <div style="margin-bottom:8px;text-align:${m.autor_tipo==='usuario'?'right':'left'}">
+          <div style="display:inline-block;padding:6px 10px;border-radius:10px;background:${m.autor_tipo==='usuario'?'rgba(100,149,237,0.3)':'rgba(255,255,255,0.1)'};max-width:80%;">
+            <span style="font-size:11px;opacity:0.7">${escapeHtml(m.autor_tipo)}</span><br>
+            ${escapeHtml(m.texto)}
+          </div>
+        </div>
+      `).join('');
+      lista.scrollTop = lista.scrollHeight;
+    } catch {
+      lista.innerHTML = '<p class="estado-vazio">Erro ao carregar.</p>';
+    }
+  }
+  async function enviarMensagemChat() {
+    const input = document.getElementById('chat-texto');
+    const texto = input.value.trim();
+    if (!texto) return;
+    try {
+      const res = await chamarAPI(`/chamados/${chatChamadoAtual}/mensagens`, 'POST', { texto });
+      if (!res.ok) { alert('Erro ao enviar.'); return; }
+      input.value = '';
+      await carregarMensagens();
+    } catch {
+      alert('Erro ao conectar.');
+    }
   }
 
   function labelStatus(status) {
