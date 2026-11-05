@@ -1,30 +1,84 @@
-from fastapi import APIRouter, Depends, HTTPException
-from app.models import Item, ItemUpdate
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from app.models import Item, ItemUpdate, ItemStatusEnum, Chamado, ChamadoStatusEnum, Usuario
 from app.database import get_session
 from sqlmodel import Session, select
-from datetime import date
+from datetime import date, datetime
 from app.auth import get_usuario_atual, exigir_secretaria
+from app.supabase_storage import upload_file
+import uuid
+import os
 
 router = APIRouter(prefix="/item", tags=["Item"])
 
+
+def _score_item_chamado(item: Item, chamado: Chamado) -> int:
+    s = 0
+    if item.tipo and chamado.tipo and item.tipo.lower() == chamado.tipo.lower():
+        s += 40
+    elif item.tipo and chamado.tipo and (chamado.tipo.lower() in item.tipo.lower() or item.tipo.lower() in chamado.tipo.lower()):
+        s += 20
+    if item.cor and chamado.cor and item.cor.lower() == chamado.cor.lower():
+        s += 20
+    if item.marca and chamado.marca and item.marca.lower() == chamado.marca.lower():
+        s += 15
+    if item.local_encontrado and chamado.local_perda:
+        a, b = item.local_encontrado.lower(), chamado.local_perda.lower()
+        if a in b or b in a:
+            s += 15
+    if item.data_entrada and chamado.data_perda:
+        try:
+            delta = abs((item.data_entrada - chamado.data_perda).days)
+            if delta <= 7:
+                s += max(0, 10 - delta)
+        except Exception:
+            pass
+    return s
+
+
 # cadastra item na database
-@router.post("/", status_code = 201)
-def cadastrar_item(item: Item, session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)): #adcionar item na table item na database
+@router.post("/", status_code=201)
+def cadastrar_item(item: Item, session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
     item.data_entrada = date.today()
+    item.status = ItemStatusEnum.disponivel
     session.add(item)
     session.commit()
     session.refresh(item)
+
+    # notificar chamados abertos com match
+    try:
+        chamados = session.exec(select(Chamado).where(Chamado.status == ChamadoStatusEnum.em_aberto)).all()
+        api_key = os.getenv("RESEND_API_KEY")
+        for ch in chamados:
+            if _score_item_chamado(item, ch) >= 30:
+                usuario_db = session.get(Usuario, ch.cpf_usuario_usuario)
+                if usuario_db and usuario_db.email and api_key:
+                    import resend
+                    resend.api_key = api_key
+                    try:
+                        resend.Emails.send({
+                            "from": "onboarding@resend.dev",
+                            "to": usuario_db.email,
+                            "subject": "Possível item encontrado - Apetec",
+                            "html": f"<p>Olá {usuario_db.nome},</p><p>Cadastramos um item que pode ser o seu: <strong>{item.tipo} {item.marca} ({item.cor})</strong>.</p><p>Local: {item.local_encontrado}</p><p>Abra um chamado ou procure a secretaria.</p>",
+                        })
+                    except Exception:
+                        pass
+    except Exception:
+        pass
+
     return item
+
 
 #lista os itens da table item
 @router.get("/")
-def listar_itens (session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)): # listar todos os itens importando dados da database
+def listar_itens(session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
     itens = session.exec(select(Item)).all()
     return itens
 
+
 #busca item pelo ID
 @router.get("/{id}")
-def buscar_item(id: int, session: Session = Depends(get_session)):
+def buscar_item(id: int, session: Session = Depends(get_session), _: dict = Depends(get_usuario_atual)):
     item = session.get(Item, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item não encontrado")
@@ -49,4 +103,31 @@ def deletar_item(id: int, session: Session = Depends(get_session), _: dict = Dep
         raise HTTPException(status_code=404, detail="Item não encontrado")
     session.delete(item)
     session.commit()
-    
+
+
+@router.post("/{id}/foto", status_code=200)
+async def upload_foto_item(id: int, file: UploadFile = File(...), session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
+    item = session.get(Item, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item nao encontrado")
+    filename = file.filename or ""
+    ext = os.path.splitext(filename)[1].lstrip(".").lower()
+    allowed = {"png", "jpg", "jpeg", "webp", "gif"}
+    if ext not in allowed:
+        raise HTTPException(status_code=400, detail="Extensao nao permitida. Use png, jpg, jpeg, webp ou gif.")
+    content = await file.read()
+    max_size = 5 * 1024 * 1024
+    if len(content) > max_size:
+        raise HTTPException(status_code=400, detail="Arquivo muito grande. Maximo 5MB.")
+    if not ext:
+        ext = "bin"
+    path = "itens/" + str(id) + "/" + uuid.uuid4().hex + "." + ext
+    try:
+        url = upload_file(content, file.content_type or "application/octet-stream", path)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Falha no upload: {e}")
+    item.fotoUrl = url
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return item

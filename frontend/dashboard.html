@@ -6,7 +6,7 @@
   <title>Apetec - Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Anonymous+Pro&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/frontend/style/style.css">
+  <link rel="stylesheet" href="/frontend/style/style.css?v=8">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
 
 <!-- Topo -->
 <header class="dash-header">
-  <div class="dash-logo">✦ <span class="apetec">APETEC</span></div>
+  <div class="dash-logo"><i class="fas fa-magnifying-glass"></i> <span class="apetec">APETEC</span></div>
   <div class="dash-usuario">
     <span class="dash-nome" id="dash-nome">Carregando...</span>
     <button class="btn-perfil" onclick="abrirAba('perfil')" title="Perfil">⊙</button>
@@ -115,7 +115,7 @@
 
 <p class="rodape">Apetec · Sistema de Achados e Perdidos Escolar</p>
 
-<script src="/frontend/js/auth.js"></script>
+<script src="/frontend/js/auth.js?v=8"></script>
 <script>
 
   // ── Inicialização ──
@@ -148,12 +148,12 @@
       document.getElementById('dash-nome').textContent = data.nome.split(' ')[0];
 
       document.getElementById('perfil-grid').innerHTML = `
-        <div class="perfil-campo"><span class="perfil-label">Nome</span><span class="perfil-valor">${data.nome}</span></div>
-        <div class="perfil-campo"><span class="perfil-label">CPF</span><span class="perfil-valor">${data.cpf}</span></div>
-        <div class="perfil-campo"><span class="perfil-label">E-mail</span><span class="perfil-valor">${data.email}</span></div>
-        <div class="perfil-campo"><span class="perfil-label">Telefone</span><span class="perfil-valor">${data.telefone}</span></div>
-        <div class="perfil-campo"><span class="perfil-label">Turma / Módulo</span><span class="perfil-valor">${data.turma_modulo}</span></div>
-        <div class="perfil-campo"><span class="perfil-label">Cargo</span><span class="perfil-valor">${data.cargo}</span></div>
+        <div class="perfil-campo"><span class="perfil-label">Nome</span><span class="perfil-valor">${escapeHtml(data.nome)}</span></div>
+        <div class="perfil-campo"><span class="perfil-label">CPF</span><span class="perfil-valor">${escapeHtml(data.cpf)}</span></div>
+        <div class="perfil-campo"><span class="perfil-label">E-mail</span><span class="perfil-valor">${escapeHtml(data.email)}</span></div>
+        <div class="perfil-campo"><span class="perfil-label">Telefone</span><span class="perfil-valor">${escapeHtml(data.telefone)}</span></div>
+        <div class="perfil-campo"><span class="perfil-label">Turma / Módulo</span><span class="perfil-valor">${escapeHtml(data.turma_modulo)}</span></div>
+        <div class="perfil-campo"><span class="perfil-label">Cargo</span><span class="perfil-valor">${escapeHtml(data.cargo)}</span></div>
       `;
     } catch {
       document.getElementById('perfil-grid').innerHTML = '<p class="estado-vazio">Erro ao carregar dados.</p>';
@@ -174,14 +174,28 @@
         return;
       }
 
-      lista.innerHTML = data.map(c => `
+      // Enriquecer com item vinculado
+      const enriched = await Promise.all(data.map(async c => {
+        if (c.id_item) {
+          try {
+            const r = await chamarAPI(`/item/${c.id_item}`, 'GET');
+            if (r.ok) c._item = await r.json();
+          } catch {}
+        }
+        return c;
+      }));
+
+      lista.innerHTML = enriched.map(c => `
         <div class="chamado-item">
           <div class="chamado-info">
-            <span class="chamado-tipo">${c.tipo} · ${c.marca}</span>
-            <span class="chamado-detalhe">${c.cor} — ${c.local_perda}</span>
-            <span class="chamado-data">${formatarData(c.data_perda)}</span>
+            <span class="chamado-tipo">${escapeHtml(c.tipo)} · ${escapeHtml(c.marca)}</span>
+            <span class="chamado-detalhe">${escapeHtml(c.cor)} — ${escapeHtml(c.local_perda)}</span>
+            <span class="chamado-data">${escapeHtml(formatarData(c.data_perda))}</span>
+            ${c._item ? `<span class="chamado-detalhe" style="color:#7CFC00">Item encontrado: ${escapeHtml(c._item.tipo)} ${escapeHtml(c._item.marca)} (${escapeHtml(c._item.cor)}) — ${escapeHtml(c._item.local_encontrado)}</span>
+            ${c._item.fotoUrl ? `<img src="${escapeHtml(c._item.fotoUrl)}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;margin-top:4px;">` : ''}` : ''}
+            ${c.status === 'respondido' ? '<span class="chamado-detalhe" style="color:#FFD700">Pronto para retirada na secretaria.</span>' : ''}
           </div>
-          <span class="badge ${c.status}">${labelStatus(c.status)}</span>
+          <span class="badge ${escapeHtml(c.status)}">${escapeHtml(labelStatus(c.status))}</span>
         </div>
       `).join('');
     } catch {

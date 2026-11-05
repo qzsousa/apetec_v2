@@ -43,5 +43,8 @@ http://localhost:8000/docs
 - `/usuarios` → cadastro e gerenciamento de alunos
 - `/itens` → gerenciamento de itens encontrados
 - `/chamados` → abertura e acompanhamento de chamados
+- `/chamados/{id}/sugestoes` → sugestões de itens compatíveis (secretaria)
+- `/chamados/{id}/vincular` → vincula item a chamado e notifica aluno (secretaria)
+- `/chamados/{id}/entregar` → marca chamado/item como entregue (secretaria)
 - `/auth` → autenticação e geração de token
 

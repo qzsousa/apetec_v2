@@ -14,6 +14,23 @@ engine = create_engine(DATABASE_URL)
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
+    alters = [
+        "ALTER TABLE item ADD COLUMN fotoUrl TEXT",
+        "ALTER TABLE item ADD COLUMN status TEXT DEFAULT 'disponivel'",
+        "ALTER TABLE item ADD COLUMN data_saida DATE",
+        "ALTER TABLE chamado ADD COLUMN data_resposta TIMESTAMP",
+        "ALTER TABLE chamado ADD COLUMN data_entrega TIMESTAMP",
+        "ALTER TABLE chamado ADD COLUMN entregue_por TEXT",
+        "ALTER TABLE chamado ADD COLUMN observacao_entrega TEXT",
+        "ALTER TABLE chamado ADD COLUMN notificado BOOLEAN DEFAULT 0",
+    ]
+    for sql in alters:
+        try:
+            with engine.connect() as conn:
+                conn.exec_driver_sql(sql)
+                conn.commit()
+        except Exception:
+            pass
 
 def get_session():
     with Session(engine) as session:
