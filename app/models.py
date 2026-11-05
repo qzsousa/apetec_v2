@@ -45,6 +45,8 @@ class Usuario(SQLModel, table=True):
     turma_modulo: TurmaModuloEnum
     cargo: CargoEnum
     senha: str
+    email_confirmado: bool = Field(default=False)
+    token_confirmacao: Optional[str] = None
 
 
 class ItemStatusEnum(str, Enum):
@@ -82,6 +84,8 @@ class Chamado(SQLModel, table=True):
     entregue_por: Optional[str] = Field(default=None, foreign_key="secretaria.cpf")
     observacao_entrega: Optional[str] = None
     notificado: bool = Field(default=False)
+    fotoUrl: Optional[str] = None
+    codigo_retirada: Optional[str] = None
 
 
 class Secretaria(SQLModel, table=True):
@@ -145,6 +149,8 @@ class ChamadoUpdate(SQLModel):
     entregue_por: Optional[str] = None
     observacao_entrega: Optional[str] = None
     notificado: Optional[bool] = None
+    fotoUrl: Optional[str] = None
+    codigo_retirada: Optional[str] = None
 
 
 class LoginUsuario(SQLModel):
@@ -186,6 +192,35 @@ class SecretariaPublic(SQLModel):
     nome: str
     email: str
     telefone: str
+
+
+class AuditLog(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    ator_tipo: str
+    ator_cpf: str
+    acao: str
+    entidade: str
+    entidade_id: Optional[str] = None
+    detalhes: Optional[str] = None
+    criado_em: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Notificacao(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    cpf_usuario: str = Field(index=True)
+    tipo: str
+    mensagem: str
+    lida: bool = Field(default=False)
+    criado_em: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Feedback(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    id_chamado: int = Field(foreign_key="chamado.id", index=True)
+    cpf_usuario: str
+    nota: int
+    comentario: Optional[str] = None
+    criado_em: datetime = Field(default_factory=datetime.utcnow)
 
 
 class Mensagem(SQLModel, table=True):

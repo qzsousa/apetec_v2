@@ -6,21 +6,13 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import os
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login/usuario")
-
-def get_usuario_atual(token: str = Depends(oauth2_scheme)) -> dict:
-    payload = verificar_token(token)
-    if payload is None:
-        raise HTTPException(status_code=401, detail="Token inválido ou expirado")
-    return payload
-
-def exigir_secretaria(payload: dict = Depends(get_usuario_atual)):
-    if not (payload["tipo"] == "secretaria"):
-        raise HTTPException(status_code=403, detail="Usuário sem permissão")
-
 load_dotenv()
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login/usuario")
+
 SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY environment variable is required")
 ALGORITHM = "HS256"
 EXPIRACAO_MINUTOS = 60
 
@@ -45,3 +37,16 @@ def verificar_token(token: str) -> dict:
     except JWTError:
         return None
 
+def get_usuario_atual(token: str = Depends(oauth2_scheme)) -> dict:
+    payload = verificar_token(token)
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Token inválido ou expirado")
+    return payload
+
+def exigir_secretaria(payload: dict = Depends(get_usuario_atual)):
+    if not (payload.get("tipo") == "secretaria"):
+        raise HTTPException(status_code=403, detail="Usuário sem permissão")
+    return payload
+
+def is_secretaria(payload: dict) -> bool:
+    return payload.get("tipo") == "secretaria"

@@ -6,7 +6,8 @@
   <title>Apetec - Cadastro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Anonymous+Pro&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/frontend/style/style.css">
+  <link rel="stylesheet" href="/frontend/style/style.css?v=8">
+  <script src="/frontend/js/auth.js?v=8"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -25,7 +26,7 @@
 
   <div class="form-grupo">
     <label for="input-cpf">CPF</label>
-    <input oninput="mascaraCPF(this)" type="text" id="input-cpf" placeholder="Digite seu CPF" max-length="11">
+    <input oninput="mascaraCPF(this)" type="text" id="input-cpf" placeholder="Digite seu CPF" maxlength="14">
   </div>
 
   <div class="form-grupo">
@@ -118,7 +119,7 @@
 
   input.addEventListener('input', function() {
     // Permite letras (com e sem acento) e espaços. Remove números e símbolos.
-    this.value = this.value.replace(/[^a-zA-ZÀ-ÿ ]/g, '');
+    this.value = this.value.replace(/[^a-zA-Z\u00C0-\u00FF ]/g, '');
   });
   function verificarSenha() {
   const senha = document.getElementById('input-senha').value;
@@ -206,11 +207,6 @@
   }
 
   async function cadastrar() {
-
-    if (!validarCPF(document.getElementById('input-cpf').value)) {
-      mostrarMensagem('CPF inválido. Digite um CPF válido.', 'erro');
-      return;
-    }
     const msg = document.getElementById('msg');
     msg.style.display = 'none';
 
@@ -224,49 +220,44 @@
       senha:        document.getElementById('input-senha').value
     };
 
-    // Validação básica no frontend
     if (!body.cpf || !body.nome || !body.telefone || !body.email || !body.turma_modulo || !body.cargo || !body.senha) {
       mostrarMensagem('Preencha todos os campos.', 'erro');
       return;
     }
-   if (!body.email.includes("@") || !body.email.includes(".")) {
-      mostrarMensagem('Digite um e-mail válido.', 'erro');
+    if (!validarCPF(body.cpf)) {
+      mostrarMensagem('CPF invalido. Digite um CPF valido.', 'erro');
       return;
     }
-    try {
-    const res  = await fetch('/usuarios/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
-    const data = await res.json();
+    if (!body.email.includes("@") || !body.email.includes(".")) {
+      mostrarMensagem('Digite um e-mail valido.', 'erro');
+      return;
+    }
+    if (!senhaValida(body.senha)) {
+      mostrarMensagem('A senha nao atende aos requisitos minimos.', 'erro');
+      return;
+    }
 
-    if (!res.ok) {
-        mostrarMensagem('Erro ao cadastrar. Verifique os dados.', 'erro');
+    try {
+      const res = await chamarAPI('/usuarios/', 'POST', body);
+      let data = null;
+      try { data = await res.json(); } catch (e) { data = null; }
+
+      if (!res.ok) {
+        const detail = (data && data.detail) ? data.detail : 'Erro ao cadastrar. Verifique os dados.';
+        mostrarMensagem(detail, 'erro');
         return;
+      }
+
+      document.getElementById('register-container').style.display = 'none';
+      document.getElementById('mensagem_sucesso').style.display = 'flex';
+    } catch {
+      mostrarMensagem('Erro ao conectar com o servidor.', 'erro');
     }
-   
-    // dentro de cadastrar(), antes do body:
-    if (!senhaValida(document.getElementById('input-senha').value)) {
-      mostrarMensagem('A senha não atende aos requisitos mínimos.', 'erro');
-      return;
-    }
-    // só aparece se deu 201
-    document.getElementById('register-container').style.display = 'none';
-    document.getElementById('mensagem_sucesso').style.display = 'flex';
-    if (!res.ok) {
-    const data = await res.json();
-    mostrarMensagem(data.detail || 'Erro ao cadastrar. Verifique os dados.', 'erro');
-    return;
-}
-} catch {
-    mostrarMensagem('Erro ao conectar com o servidor.', 'erro');
-}
   }
 
   function mostrarMensagem(texto, tipo) {
     const el = document.getElementById('msg');
-    el.textContent = texto;
+    el.innerHTML = escapeHtml(texto);
     el.className = 'msg' + tipo;
     el.style.display = 'block';
   }
@@ -283,3 +274,5 @@
 
 </body>
 </html>
+
+

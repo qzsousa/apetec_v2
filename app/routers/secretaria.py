@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
-from app.models import Secretaria, SecretariaPublic, Item, ItemStatusEnum, Chamado, ChamadoStatusEnum, Usuario
+from fastapi.responses import StreamingResponse
+from app.models import Secretaria, SecretariaPublic, Item, ItemStatusEnum, Chamado, ChamadoStatusEnum, Usuario, AuditLog, Notificacao
 from app.database import get_session
-from sqlmodel import Session, select, func
+from sqlmodel import Session, select
 from datetime import date, timedelta
+import csv, io
 from app.auth import get_usuario_atual, is_secretaria
 
 
@@ -52,3 +54,39 @@ def relatorio(session: Session = Depends(get_session), usuario_atual: dict = Dep
         "total_chamados": len(chamados),
         "itens_nao_reclamados_30d": [{"id": i.id, "tipo": i.tipo, "marca": i.marca, "cor": i.cor, "data_entrada": str(i.data_entrada), "local": i.local_encontrado} for i in nao_reclamados],
     }
+
+
+@router.get("/auditoria")
+def auditoria(skip: int = 0, limit: int = 100, session: Session = Depends(get_session), usuario_atual: dict = Depends(get_usuario_atual)):
+    if not is_secretaria(usuario_atual):
+        raise HTTPException(status_code=403, detail="Usuário sem permissão")
+    logs = session.exec(select(AuditLog).order_by(AuditLog.criado_em.desc()).offset(skip).limit(limit)).all()
+    return logs
+
+
+@router.get("/exportar/itens")
+def exportar_itens(session: Session = Depends(get_session), usuario_atual: dict = Depends(get_usuario_atual)):
+    if not is_secretaria(usuario_atual):
+        raise HTTPException(status_code=403, detail="Usuário sem permissão")
+    itens = session.exec(select(Item)).all()
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["id", "tipo", "marca", "cor", "tamanho", "local_encontrado", "data_entrada", "status", "fotoUrl"])
+    for i in itens:
+        w.writerow([i.id, i.tipo, i.marca, i.cor, i.tamanho, i.local_encontrado, i.data_entrada, i.status, i.fotoUrl])
+    buf.seek(0)
+    return StreamingResponse(iter([buf.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=itens.csv"})
+
+
+@router.get("/exportar/chamados")
+def exportar_chamados(session: Session = Depends(get_session), usuario_atual: dict = Depends(get_usuario_atual)):
+    if not is_secretaria(usuario_atual):
+        raise HTTPException(status_code=403, detail="Usuário sem permissão")
+    chamados = session.exec(select(Chamado)).all()
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["id", "tipo", "marca", "cor", "local_perda", "data_perda", "status", "cpf_usuario", "id_item", "codigo_retirada"])
+    for c in chamados:
+        w.writerow([c.id, c.tipo, c.marca, c.cor, c.local_perda, c.data_perda, c.status, c.cpf_usuario_usuario, c.id_item, c.codigo_retirada])
+    buf.seek(0)
+    return StreamingResponse(iter([buf.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=chamados.csv"})

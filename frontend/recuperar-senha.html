@@ -6,7 +6,8 @@
   <title>Apetec - Recuperar Senha</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Anonymous+Pro&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/frontend/style/style.css">
+  <link rel="stylesheet" href="/frontend/style/style.css?v=8">
+  <script src="/frontend/js/auth.js?v=8"></script>
 </head>
 <body>
 
@@ -226,8 +227,8 @@
     const nova = document.getElementById('input-nova-senha').value;
     const confirmar = document.getElementById('input-confirmar-senha').value;
 
-    if (!nova || nova.length < 6) {
-      mostrarMsg('msg-3', 'A senha deve ter pelo menos 6 caracteres.', 'erro');
+    if (!senhaValida(nova)) {
+      mostrarMsg('msg-3', 'A senha nao atende aos requisitos minimos.', 'erro');
       return;
     }
     if (nova !== confirmar) {
@@ -305,3 +306,6 @@
 
 </body>
 </html>
+
+
+

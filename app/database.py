@@ -23,6 +23,10 @@ def create_db_and_tables():
         "ALTER TABLE chamado ADD COLUMN entregue_por TEXT",
         "ALTER TABLE chamado ADD COLUMN observacao_entrega TEXT",
         "ALTER TABLE chamado ADD COLUMN notificado BOOLEAN DEFAULT 0",
+        "ALTER TABLE chamado ADD COLUMN fotoUrl TEXT",
+        "ALTER TABLE chamado ADD COLUMN codigo_retirada TEXT",
+        "ALTER TABLE usuario ADD COLUMN email_confirmado BOOLEAN DEFAULT 0",
+        "ALTER TABLE usuario ADD COLUMN token_confirmacao TEXT",
     ]
     for sql in alters:
         try:

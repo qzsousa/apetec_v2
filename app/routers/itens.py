@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from app.models import Item, ItemUpdate, ItemStatusEnum, Chamado, ChamadoStatusEnum, Usuario, Secretaria
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from app.models import Item, ItemUpdate, ItemStatusEnum, Chamado, ChamadoStatusEnum, Usuario, Secretaria, Notificacao, AuditLog
 from app.database import get_session
 from sqlmodel import Session, select
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from app.auth import get_usuario_atual, exigir_secretaria, is_secretaria
+from app.audit import registrar_auditoria
 from app.supabase_storage import upload_file
 import uuid
 import os
@@ -35,7 +36,6 @@ def _score_item_chamado(item: Item, chamado: Chamado) -> int:
     return s
 
 
-# cadastra item na database
 @router.post("/", status_code=201)
 def cadastrar_item(item: Item, session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
     item.data_entrada = date.today()
@@ -63,73 +63,63 @@ def cadastrar_item(item: Item, session: Session = Depends(get_session), _: dict 
                         })
                     except Exception:
                         pass
+                notif = Notificacao(cpf_usuario=ch.cpf_usuario_usuario, tipo="item_encontrado", mensagem=f"Item compatível cadastrado: {item.tipo} {item.marca}")
+                session.add(notif)
+                session.commit()
     except Exception:
         pass
 
+    registrar_auditoria(session, "secretaria", "secretaria", "cadastrar_item", "item", item.id)
     return item
 
 
-#lista os itens da table item
 @router.get("/")
-def listar_itens(session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
-    itens = session.exec(select(Item)).all()
-    return itens
+def listar_itens(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    tipo: Optional[str] = Query(None),
+    cor: Optional[str] = Query(None),
+    local: Optional[str] = Query(None),
+    status: Optional[str] = Query(None),
+    session: Session = Depends(get_session),
+    _: dict = Depends(exigir_secretaria),
+):
+    from typing import Optional
+    stmt = select(Item)
+    if tipo:
+        stmt = stmt.where(Item.tipo.contains(tipo))
+    if cor:
+        stmt = stmt.where(Item.cor.contains(cor))
+    if local:
+        stmt = stmt.where(Item.local_encontrado.contains(local))
+    if status:
+        stmt = stmt.where(Item.status == status)
+    stmt = stmt.offset(skip).limit(limit)
+    return session.exec(stmt).all()
 
 
-# lista itens disponiveis para alunos
 @router.get("/disponiveis")
-def listar_disponiveis(session: Session = Depends(get_session), usuario: dict = Depends(get_usuario_atual)):
-    itens = session.exec(select(Item).where(Item.status == ItemStatusEnum.disponivel)).all()
-    return itens
+def listar_disponiveis(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    tipo: Optional[str] = Query(None),
+    cor: Optional[str] = Query(None),
+    local: Optional[str] = Query(None),
+    session: Session = Depends(get_session),
+    usuario: dict = Depends(get_usuario_atual),
+):
+    from typing import Optional
+    stmt = select(Item).where(Item.status == ItemStatusEnum.disponivel)
+    if tipo:
+        stmt = stmt.where(Item.tipo.contains(tipo))
+    if cor:
+        stmt = stmt.where(Item.cor.contains(cor))
+    if local:
+        stmt = stmt.where(Item.local_encontrado.contains(local))
+    stmt = stmt.offset(skip).limit(limit)
+    return session.exec(stmt).all()
 
 
-# aluno reivindica um item encontrado
-@router.post("/{id}/reivindicar", status_code=201)
-def reivindicar_item(id: int, session: Session = Depends(get_session), usuario: dict = Depends(get_usuario_atual)):
-    if is_secretaria(usuario):
-        raise HTTPException(status_code=403, detail="Secretaria não pode reivindicar")
-    item = session.get(Item, id)
-    if not item or item.status != ItemStatusEnum.disponivel:
-        raise HTTPException(status_code=404, detail="Item não disponível")
-    chamado = Chamado(
-        tipo=item.tipo,
-        cor=item.cor,
-        marca=item.marca,
-        criterio_validacao="reivindicado pelo aluno",
-        data_perda=item.data_entrada or date.today(),
-        local_perda=item.local_encontrado,
-        status=ChamadoStatusEnum.em_aberto,
-        cpf_usuario_usuario=usuario["sub"],
-        id_item=item.id,
-    )
-    session.add(chamado)
-    session.commit()
-    session.refresh(chamado)
-
-    # notificar secretaria
-    try:
-        api_key = os.getenv("RESEND_API_KEY")
-        if api_key:
-            secs = session.exec(select(Secretaria)).all()
-            import resend
-            resend.api_key = api_key
-            for sec in secs:
-                try:
-                    resend.Emails.send({
-                        "from": "onboarding@resend.dev",
-                        "to": sec.email,
-                        "subject": "Item reivindicado - Apetec",
-                        "html": f"<p>O item {item.tipo} {item.marca} ({item.cor}) foi reivindicado por um aluno (CPF {usuario['sub']}).</p><p>Valide na secretaria.</p>",
-                    })
-                except Exception:
-                    pass
-    except Exception:
-        pass
-
-    return chamado
-
-
-#busca item pelo ID
 @router.get("/{id}")
 def buscar_item(id: int, session: Session = Depends(get_session), _: dict = Depends(get_usuario_atual)):
     item = session.get(Item, id)
@@ -147,7 +137,9 @@ def atualizar_dados_item(dados: ItemUpdate, id: int, session: Session = Depends(
     item.sqlmodel_update(dados_novos)
     session.commit()
     session.refresh(item)
+    registrar_auditoria(session, "secretaria", "secretaria", "atualizar_item", "item", item.id)
     return item
+
 
 @router.delete("/{id}", status_code=204)
 def deletar_item(id: int, session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
@@ -156,6 +148,8 @@ def deletar_item(id: int, session: Session = Depends(get_session), _: dict = Dep
         raise HTTPException(status_code=404, detail="Item não encontrado")
     session.delete(item)
     session.commit()
+    registrar_auditoria(session, "secretaria", "secretaria", "deletar_item", "item", id)
+    return None
 
 
 @router.post("/{id}/foto", status_code=200)
@@ -184,3 +178,69 @@ async def upload_foto_item(id: int, file: UploadFile = File(...), session: Sessi
     session.commit()
     session.refresh(item)
     return item
+
+
+@router.post("/{id}/reivindicar", status_code=201)
+def reivindicar_item(id: int, session: Session = Depends(get_session), usuario: dict = Depends(get_usuario_atual)):
+    if is_secretaria(usuario):
+        raise HTTPException(status_code=403, detail="Secretaria não pode reivindicar")
+    item = session.get(Item, id)
+    if not item or item.status != ItemStatusEnum.disponivel:
+        raise HTTPException(status_code=404, detail="Item não disponível")
+    chamado = Chamado(
+        tipo=item.tipo,
+        cor=item.cor,
+        marca=item.marca,
+        criterio_validacao="reivindicado pelo aluno",
+        data_perda=item.data_entrada or date.today(),
+        local_perda=item.local_encontrado,
+        status=ChamadoStatusEnum.em_aberto,
+        cpf_usuario_usuario=usuario["sub"],
+        id_item=item.id,
+    )
+    session.add(chamado)
+    session.commit()
+    session.refresh(chamado)
+
+    # notificar secretaria
+    try:
+        api_key = os.getenv("RESEND_API_KEY")
+        secs = session.exec(select(Secretaria)).all()
+        if api_key:
+            import resend
+            resend.api_key = api_key
+            for sec in secs:
+                try:
+                    resend.Emails.send({
+                        "from": "onboarding@resend.dev",
+                        "to": sec.email,
+                        "subject": "Item reivindicado - Apetec",
+                        "html": f"<p>O item {item.tipo} {item.marca} ({item.cor}) foi reivindicado por um aluno (CPF {usuario['sub']}).</p><p>Valide na secretaria.</p>",
+                    })
+                except Exception:
+                    pass
+        for sec in secs:
+            notif = Notificacao(cpf_usuario=sec.cpf, tipo="reivindicacao", mensagem=f"Item {item.tipo} reivindicado por aluno {usuario['sub']}")
+            session.add(notif)
+        session.commit()
+    except Exception:
+        pass
+
+    registrar_auditoria(session, "usuario", usuario["sub"], "reivindicar_item", "item", item.id)
+    return chamado
+
+
+@router.post("/expirar", status_code=200)
+def expirar_itens(session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
+    limite = date.today() - timedelta(days=90)
+    itens = session.exec(select(Item).where(Item.status == ItemStatusEnum.disponivel)).all()
+    count = 0
+    for it in itens:
+        if it.data_entrada and it.data_entrada < limite:
+            it.status = ItemStatusEnum.doado
+            it.data_saida = date.today()
+            session.add(it)
+            count += 1
+    session.commit()
+    registrar_auditoria(session, "secretaria", "secretaria", "expirar_itens", "item", None, f"{count} itens doados")
+    return {"doado": count}

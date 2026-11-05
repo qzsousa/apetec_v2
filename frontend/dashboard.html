@@ -32,6 +32,7 @@
   <button class="tab-btn ativo" id="tab-novo"    onclick="abrirAba('novo')">+ Novo Chamado</button>
   <button class="tab-btn"       id="tab-chamados" onclick="abrirAba('chamados')">Meus Chamados</button>
   <button class="tab-btn"       id="tab-itens"    onclick="abrirAba('itens')">Itens Encontrados</button>
+  <button class="tab-btn"       id="tab-notif"    onclick="abrirAba('notif')">Notificações</button>
   <button class="tab-btn"       id="tab-perfil"  onclick="abrirAba('perfil')">Perfil</button>
 </nav>
 
@@ -101,8 +102,23 @@
     <div class="dash-card">
       <h2 class="card-titulo">Itens encontrados</h2>
       <p class="card-sub">Veja os itens cadastrados pela secretaria. Se for seu, clique em "É meu".</p>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input type="text" id="filtro-tipo" placeholder="Tipo" style="flex:1;padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#fff;">
+        <input type="text" id="filtro-cor" placeholder="Cor" style="flex:1;padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#fff;">
+        <button class="btn-secundario" onclick="carregarItensAluno()">Filtrar</button>
+      </div>
       <div id="lista-itens-aluno" class="lista-chamados">
         <p class="estado-vazio">Carregando itens...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ABA: NOTIFICAÇÕES ── -->
+  <section class="dash-section" id="sec-notif">
+    <div class="dash-card">
+      <h2 class="card-titulo">Notificações</h2>
+      <div id="lista-notif" class="lista-chamados">
+        <p class="estado-vazio">Carregando...</p>
       </div>
     </div>
   </section>
@@ -162,6 +178,7 @@
 
     if (aba === 'chamados') carregarChamados();
     if (aba === 'itens')    carregarItensAluno();
+    if (aba === 'notif')    carregarNotificacoes();
     if (aba === 'perfil')   carregarPerfil();
   }
 
@@ -228,6 +245,7 @@
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
             <span class="badge ${escapeHtml(c.status)}">${escapeHtml(labelStatus(c.status))}</span>
+            ${c.status === 'finalizado' ? `<button class="btn-secundario" onclick="enviarFeedback(${escapeHtml(c.id)})">Avaliar</button>` : ''}
             <button class="btn-secundario" onclick="abrirChat(${escapeHtml(c.id)})">Conversar</button>
           </div>
         </div>
@@ -335,7 +353,14 @@
     const lista = document.getElementById('lista-itens-aluno');
     lista.innerHTML = '<p class="estado-vazio">Carregando...</p>';
     try {
-      const res = await chamarAPI('/item/disponiveis', 'GET');
+      const tipo = document.getElementById('filtro-tipo')?.value?.trim() || '';
+      const cor = document.getElementById('filtro-cor')?.value?.trim() || '';
+      let url = '/item/disponiveis';
+      const params = [];
+      if (tipo) params.push('tipo=' + encodeURIComponent(tipo));
+      if (cor) params.push('cor=' + encodeURIComponent(cor));
+      if (params.length) url += '?' + params.join('&');
+      const res = await chamarAPI(url, 'GET');
       const data = await res.json();
       if (!Array.isArray(data) || data.length === 0) {
         lista.innerHTML = '<p class="estado-vazio">Nenhum item encontrado disponível.</p>';
@@ -365,6 +390,53 @@
       alert('Reivindicação enviada! A secretaria irá validar.');
       carregarItensAluno();
       carregarChamados();
+    } catch {
+      alert('Erro ao conectar.');
+    }
+  }
+
+  async function carregarNotificacoes() {
+    const lista = document.getElementById('lista-notif');
+    lista.innerHTML = '<p class="estado-vazio">Carregando...</p>';
+    try {
+      const res = await chamarAPI('/notificacoes/me', 'GET');
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        lista.innerHTML = '<p class="estado-vazio">Nenhuma notificação.</p>';
+        return;
+      }
+      lista.innerHTML = data.map(n => `
+        <div class="chamado-item">
+          <div class="chamado-info">
+            <span class="chamado-tipo">${escapeHtml(n.tipo)}</span>
+            <span class="chamado-detalhe">${escapeHtml(n.mensagem)}</span>
+            <span class="chamado-data">${escapeHtml(formatarDataHora(n.criado_em))}</span>
+          </div>
+          ${!n.lida ? `<button class="btn-secundario" onclick="marcarNotifLida(${escapeHtml(n.id)})">Marcar lida</button>` : '<span style="opacity:0.5">lida</span>'}
+        </div>
+      `).join('');
+    } catch {
+      lista.innerHTML = '<p class="estado-vazio">Erro ao carregar.</p>';
+    }
+  }
+  async function marcarNotifLida(id) {
+    try {
+      await chamarAPI(`/notificacoes/${id}/ler`, 'POST');
+      carregarNotificacoes();
+    } catch {}
+  }
+  function formatarDataHora(dt) {
+    if (!dt) return '—';
+    return String(dt).replace('T', ' ').slice(0, 16);
+  }
+  async function enviarFeedback(id) {
+    const nota = prompt('Nota de 1 a 5:');
+    if (!nota) return;
+    const comentario = prompt('Comentário (opcional):') || '';
+    try {
+      const res = await chamarAPI(`/chamados/${id}/feedback`, 'POST', { nota: parseInt(nota), comentario });
+      if (!res.ok) { alert('Erro ao enviar feedback.'); return; }
+      alert('Feedback enviado. Obrigado!');
     } catch {
       alert('Erro ao conectar.');
     }
