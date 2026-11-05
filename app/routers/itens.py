@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from typing import Optional
 from app.models import Item, ItemUpdate, ItemStatusEnum, Chamado, ChamadoStatusEnum, Usuario, Secretaria, Notificacao, AuditLog
 from app.database import get_session
 from sqlmodel import Session, select
@@ -84,7 +85,6 @@ def listar_itens(
     session: Session = Depends(get_session),
     _: dict = Depends(exigir_secretaria),
 ):
-    from typing import Optional
     stmt = select(Item)
     if tipo:
         stmt = stmt.where(Item.tipo.contains(tipo))
@@ -108,7 +108,6 @@ def listar_disponiveis(
     session: Session = Depends(get_session),
     usuario: dict = Depends(get_usuario_atual),
 ):
-    from typing import Optional
     stmt = select(Item).where(Item.status == ItemStatusEnum.disponivel)
     if tipo:
         stmt = stmt.where(Item.tipo.contains(tipo))

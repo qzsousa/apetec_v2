@@ -60,7 +60,6 @@ def listar_chamados(
     session: Session = Depends(get_session),
     usuario: dict = Depends(get_usuario_atual),
 ):
-    from typing import Optional
     stmt = select(Chamado)
     if not is_secretaria(usuario):
         stmt = stmt.where(Chamado.cpf_usuario_usuario == int(usuario["sub"]) if str(usuario["sub"]).isdigit() else Chamado.cpf_usuario_usuario == usuario["sub"])
