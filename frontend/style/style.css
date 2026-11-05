@@ -1536,3 +1536,113 @@ input[type="file"]::file-selector-button:hover {
 .btn-primario, .btn-secundario, .btn-deletar, button {
   cursor: pointer;
 }
+
+/* ================= MODALS (tema Apetec) ================= */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 85vh;
+  overflow: auto;
+  color: #fff;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  font-family: 'Crimson Pro', serif;
+}
+
+.modal-card h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #f0c31f;
+  margin-bottom: 12px;
+}
+
+.modal-card input,
+.modal-card textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  margin-top: 8px;
+}
+
+.modal-card input:focus,
+.modal-card textarea:focus {
+  outline: none;
+  border-color: #f0c31f;
+  box-shadow: 0 0 0 3px rgba(240,195,31,0.18);
+}
+
+.modal-chat-lista {
+  flex: 1;
+  overflow: auto;
+  min-height: 200px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: rgba(0,0,0,0.18);
+}
+
+.modal-chat-lista .msg-bubble {
+  margin-bottom: 8px;
+  display: flex;
+}
+
+.modal-chat-lista .msg-bubble.right { justify-content: flex-end; }
+.modal-chat-lista .msg-bubble.left { justify-content: flex-start; }
+
+.modal-chat-lista .bubble {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 12px;
+  max-width: 80%;
+  font-size: 15px;
+}
+
+.modal-chat-lista .bubble.right {
+  background: rgba(240,195,31,0.18);
+  border: 1px solid rgba(240,195,31,0.35);
+  color: #fff;
+}
+
+.modal-chat-lista .bubble.left {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+.modal-chat-lista .bubble .autor {
+  font-size: 11px;
+  opacity: 0.7;
+  font-family: 'Anonymous Pro', monospace;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}

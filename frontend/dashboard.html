@@ -145,15 +145,17 @@
 <p class="rodape">Apetec · Sistema de Achados e Perdidos Escolar</p>
 
 <!-- Modal de chat -->
-<div id="modal-chat" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:24px;max-width:500px;width:90%;max-height:80vh;display:flex;flex-direction:column;color:#fff;">
-    <h3 style="margin-bottom:12px;">Conversa</h3>
-    <div id="chat-lista" style="flex:1;overflow:auto;min-height:200px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;margin-bottom:8px;"></div>
+<div id="modal-chat" class="modal-overlay">
+  <div class="modal-card" style="display:flex;flex-direction:column;">
+    <h3>Conversa</h3>
+    <div id="chat-lista" class="modal-chat-lista"></div>
     <div style="display:flex;gap:8px;">
-      <input type="text" id="chat-texto" placeholder="Mensagem..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#fff;">
+      <input type="text" id="chat-texto" placeholder="Mensagem...">
       <button class="btn-primario" onclick="enviarMensagemChat()">Enviar</button>
     </div>
-    <button class="btn-secundario" style="margin-top:8px;" onclick="fecharChat()">Fechar</button>
+    <div class="modal-actions">
+      <button class="btn-secundario" onclick="fecharChat()">Fechar</button>
+    </div>
   </div>
 </div>
 
@@ -323,9 +325,9 @@
         return;
       }
       lista.innerHTML = data.map(m => `
-        <div style="margin-bottom:8px;text-align:${m.autor_tipo==='usuario'?'right':'left'}">
-          <div style="display:inline-block;padding:6px 10px;border-radius:10px;background:${m.autor_tipo==='usuario'?'rgba(100,149,237,0.3)':'rgba(255,255,255,0.1)'};max-width:80%;">
-            <span style="font-size:11px;opacity:0.7">${escapeHtml(m.autor_tipo)}</span><br>
+        <div class="msg-bubble ${m.autor_tipo==='usuario'?'right':'left'}">
+          <div class="bubble ${m.autor_tipo==='usuario'?'right':'left'}">
+            <span class="autor">${escapeHtml(m.autor_tipo)}</span>
             ${escapeHtml(m.texto)}
           </div>
         </div>
