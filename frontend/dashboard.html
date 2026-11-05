@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Anonymous+Pro&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/frontend/style/style.css?v=8">
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -173,13 +174,17 @@
 
       document.getElementById('dash-nome').textContent = data.nome.split(' ')[0];
 
-      document.getElementById('perfil-grid').innerHTML = `
+       document.getElementById('perfil-grid').innerHTML = `
         <div class="perfil-campo"><span class="perfil-label">Nome</span><span class="perfil-valor">${escapeHtml(data.nome)}</span></div>
         <div class="perfil-campo"><span class="perfil-label">CPF</span><span class="perfil-valor">${escapeHtml(data.cpf)}</span></div>
         <div class="perfil-campo"><span class="perfil-label">E-mail</span><span class="perfil-valor">${escapeHtml(data.email)}</span></div>
         <div class="perfil-campo"><span class="perfil-label">Telefone</span><span class="perfil-valor">${escapeHtml(data.telefone)}</span></div>
         <div class="perfil-campo"><span class="perfil-label">Turma / Módulo</span><span class="perfil-valor">${escapeHtml(data.turma_modulo)}</span></div>
         <div class="perfil-campo"><span class="perfil-label">Cargo</span><span class="perfil-valor">${escapeHtml(data.cargo)}</span></div>
+        <div style="margin-top:16px;">
+          <button class="btn-primario" onclick="gerarEtiqueta('${escapeHtml(data.cpf)}','${escapeHtml(data.nome)}','${escapeHtml(data.turma_modulo)}')">Gerar etiqueta/QR</button>
+        </div>
+        <div id="qrcode-container" style="margin-top:16px;"></div>
       `;
     } catch {
       document.getElementById('perfil-grid').innerHTML = '<p class="estado-vazio">Erro ao carregar dados.</p>';
@@ -363,6 +368,18 @@
     } catch {
       alert('Erro ao conectar.');
     }
+  }
+
+  function gerarEtiqueta(cpf, nome, turma) {
+    const container = document.getElementById('qrcode-container');
+    if (!container) return;
+    container.innerHTML = '';
+    const texto = `APETEC|${cpf}|${nome}|${turma}`;
+    new QRCode(container, { text: texto, width: 180, height: 180 });
+    const info = document.createElement('p');
+    info.className = 'estado-vazio';
+    info.textContent = 'Cole esta etiqueta no seu objeto. QR contém seus dados.';
+    container.appendChild(info);
   }
 
   function labelStatus(status) {
