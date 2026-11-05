@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from app.models import Item, ItemUpdate, ItemStatusEnum, Chamado, ChamadoStatusEnum, Usuario
+from app.models import Item, ItemUpdate, ItemStatusEnum, Chamado, ChamadoStatusEnum, Usuario, Secretaria
 from app.database import get_session
 from sqlmodel import Session, select
 from datetime import date, datetime
-from app.auth import get_usuario_atual, exigir_secretaria
+from app.auth import get_usuario_atual, exigir_secretaria, is_secretaria
 from app.supabase_storage import upload_file
 import uuid
 import os
@@ -74,6 +74,59 @@ def cadastrar_item(item: Item, session: Session = Depends(get_session), _: dict 
 def listar_itens(session: Session = Depends(get_session), _: dict = Depends(exigir_secretaria)):
     itens = session.exec(select(Item)).all()
     return itens
+
+
+# lista itens disponiveis para alunos
+@router.get("/disponiveis")
+def listar_disponiveis(session: Session = Depends(get_session), usuario: dict = Depends(get_usuario_atual)):
+    itens = session.exec(select(Item).where(Item.status == ItemStatusEnum.disponivel)).all()
+    return itens
+
+
+# aluno reivindica um item encontrado
+@router.post("/{id}/reivindicar", status_code=201)
+def reivindicar_item(id: int, session: Session = Depends(get_session), usuario: dict = Depends(get_usuario_atual)):
+    if is_secretaria(usuario):
+        raise HTTPException(status_code=403, detail="Secretaria não pode reivindicar")
+    item = session.get(Item, id)
+    if not item or item.status != ItemStatusEnum.disponivel:
+        raise HTTPException(status_code=404, detail="Item não disponível")
+    chamado = Chamado(
+        tipo=item.tipo,
+        cor=item.cor,
+        marca=item.marca,
+        criterio_validacao="reivindicado pelo aluno",
+        data_perda=item.data_entrada or date.today(),
+        local_perda=item.local_encontrado,
+        status=ChamadoStatusEnum.em_aberto,
+        cpf_usuario_usuario=usuario["sub"],
+        id_item=item.id,
+    )
+    session.add(chamado)
+    session.commit()
+    session.refresh(chamado)
+
+    # notificar secretaria
+    try:
+        api_key = os.getenv("RESEND_API_KEY")
+        if api_key:
+            secs = session.exec(select(Secretaria)).all()
+            import resend
+            resend.api_key = api_key
+            for sec in secs:
+                try:
+                    resend.Emails.send({
+                        "from": "onboarding@resend.dev",
+                        "to": sec.email,
+                        "subject": "Item reivindicado - Apetec",
+                        "html": f"<p>O item {item.tipo} {item.marca} ({item.cor}) foi reivindicado por um aluno (CPF {usuario['sub']}).</p><p>Valide na secretaria.</p>",
+                    })
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
+    return chamado
 
 
 #busca item pelo ID

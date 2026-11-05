@@ -30,6 +30,7 @@
 <nav class="dash-tabs">
   <button class="tab-btn ativo" id="tab-novo"    onclick="abrirAba('novo')">+ Novo Chamado</button>
   <button class="tab-btn"       id="tab-chamados" onclick="abrirAba('chamados')">Meus Chamados</button>
+  <button class="tab-btn"       id="tab-itens"    onclick="abrirAba('itens')">Itens Encontrados</button>
   <button class="tab-btn"       id="tab-perfil"  onclick="abrirAba('perfil')">Perfil</button>
 </nav>
 
@@ -94,6 +95,17 @@
     </div>
   </section>
 
+  <!-- ── ABA: ITENS ENCONTRADOS ── -->
+  <section class="dash-section" id="sec-itens">
+    <div class="dash-card">
+      <h2 class="card-titulo">Itens encontrados</h2>
+      <p class="card-sub">Veja os itens cadastrados pela secretaria. Se for seu, clique em "É meu".</p>
+      <div id="lista-itens-aluno" class="lista-chamados">
+        <p class="estado-vazio">Carregando itens...</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ── ABA: PERFIL ── -->
   <section class="dash-section" id="sec-perfil">
     <div class="dash-card">
@@ -148,6 +160,7 @@
     document.getElementById('sec-' + aba).classList.add('ativo');
 
     if (aba === 'chamados') carregarChamados();
+    if (aba === 'itens')    carregarItensAluno();
     if (aba === 'perfil')   carregarPerfil();
   }
 
@@ -308,6 +321,45 @@
       if (!res.ok) { alert('Erro ao enviar.'); return; }
       input.value = '';
       await carregarMensagens();
+    } catch {
+      alert('Erro ao conectar.');
+    }
+  }
+
+  async function carregarItensAluno() {
+    const lista = document.getElementById('lista-itens-aluno');
+    lista.innerHTML = '<p class="estado-vazio">Carregando...</p>';
+    try {
+      const res = await chamarAPI('/item/disponiveis', 'GET');
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        lista.innerHTML = '<p class="estado-vazio">Nenhum item encontrado disponível.</p>';
+        return;
+      }
+      lista.innerHTML = data.map(i => `
+        <div class="chamado-item">
+          <div class="chamado-info">
+            <span class="chamado-tipo">${escapeHtml(i.tipo)} · ${escapeHtml(i.marca)}</span>
+            <span class="chamado-detalhe">${escapeHtml(i.cor)} — ${escapeHtml(i.local_encontrado)}</span>
+            ${i.fotoUrl ? `<img src="${escapeHtml(i.fotoUrl)}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;margin-top:4px;">` : ''}
+            <span class="chamado-data">${escapeHtml(formatarData(i.data_entrada))}</span>
+          </div>
+          <button class="btn-primario" onclick="reivindicarItem(${escapeHtml(i.id)})">É meu</button>
+        </div>
+      `).join('');
+    } catch {
+      lista.innerHTML = '<p class="estado-vazio">Erro ao carregar itens.</p>';
+    }
+  }
+
+  async function reivindicarItem(id) {
+    if (!confirm('Confirmar que este item é seu?')) return;
+    try {
+      const res = await chamarAPI(`/item/${id}/reivindicar`, 'POST');
+      if (!res.ok) { alert('Erro ao reivindicar.'); return; }
+      alert('Reivindicação enviada! A secretaria irá validar.');
+      carregarItensAluno();
+      carregarChamados();
     } catch {
       alert('Erro ao conectar.');
     }
