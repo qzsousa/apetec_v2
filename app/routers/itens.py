@@ -71,6 +71,7 @@ def cadastrar_item(item: Item, session: Session = Depends(get_session), _: dict 
         pass
 
     registrar_auditoria(session, "secretaria", "secretaria", "cadastrar_item", "item", item.id)
+    session.refresh(item)
     return item
 
 
@@ -137,6 +138,7 @@ def atualizar_dados_item(dados: ItemUpdate, id: int, session: Session = Depends(
     session.commit()
     session.refresh(item)
     registrar_auditoria(session, "secretaria", "secretaria", "atualizar_item", "item", item.id)
+    session.refresh(item)
     return item
 
 
@@ -226,6 +228,7 @@ def reivindicar_item(id: int, session: Session = Depends(get_session), usuario: 
         pass
 
     registrar_auditoria(session, "usuario", usuario["sub"], "reivindicar_item", "item", item.id)
+    session.refresh(chamado) if chamado is not None else None
     return chamado
 
 

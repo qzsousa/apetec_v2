@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from typing import Optional
-from app.models import Chamado, ChamadoUpdate, ChamadoStatusEnum, Item, ItemStatusEnum, Usuario, Mensagem, MensagemCreate, Notificacao, Feedback, AuditLog
+from app.models import Chamado, ChamadoUpdate, ChamadoStatusEnum, Item, ItemStatusEnum, Usuario, Secretaria, Mensagem, MensagemCreate, Notificacao, Feedback, AuditLog
 from app.database import get_session
 from sqlmodel import Session, select
 from datetime import datetime, date, timedelta
@@ -44,6 +44,7 @@ def cadastrar_chamado(chamado: Chamado, session: Session = Depends(get_session),
     session.commit()
     session.refresh(chamado)
     registrar_auditoria(session, "usuario", usuario["sub"], "criar_chamado", "chamado", chamado.id)
+    session.refresh(chamado)
     # notificacao in-app para secretaria
     secs = session.exec(select(Usuario)).all()  # placeholder; secretarias separadas
     return chamado
@@ -165,6 +166,7 @@ def vincular_item(id: int, payload: dict, session: Session = Depends(get_session
         pass
 
     registrar_auditoria(session, "secretaria", usuario["sub"], "vincular_item", "chamado", chamado.id, f"item={item.id}")
+    session.refresh(chamado)
     return chamado
 
 
@@ -200,6 +202,7 @@ def entregar_item(id: int, payload: dict, session: Session = Depends(get_session
     session.commit()
 
     registrar_auditoria(session, "secretaria", usuario["sub"], "entregar_item", "chamado", chamado.id)
+    session.refresh(chamado)
     return chamado
 
 
@@ -237,7 +240,18 @@ def listar_mensagens(id: int, session: Session = Depends(get_session), usuario: 
     if not (is_secretaria(usuario) or str(chamado.cpf_usuario_usuario) == str(usuario.get("sub"))):
         raise HTTPException(status_code=403, detail="Usuário sem permissão")
     msgs = session.exec(select(Mensagem).where(Mensagem.id_chamado == id).order_by(Mensagem.criado_em)).all()
-    return msgs
+    result = []
+    for m in msgs:
+        if m.autor_tipo == "secretaria":
+            sec = session.get(Secretaria, m.autor_cpf)
+            nome = sec.nome if sec else "Secretaria"
+        else:
+            usr = session.get(Usuario, m.autor_cpf)
+            nome = usr.nome if usr else "Usuario"
+        d = m.model_dump()
+        d["autor_nome"] = nome
+        result.append(d)
+    return result
 
 
 @router.post("/{id}/mensagens", status_code=201)
@@ -258,6 +272,7 @@ def enviar_mensagem(id: int, dados: MensagemCreate, session: Session = Depends(g
         notif = Notificacao(cpf_usuario=destinatario, tipo="mensagem", mensagem=f"Nova mensagem no chamado #{id}")
         session.add(notif)
         session.commit()
+    session.refresh(msg)
     return msg
 
 
@@ -278,6 +293,7 @@ def enviar_feedback(id: int, payload: dict, session: Session = Depends(get_sessi
     session.commit()
     session.refresh(fb)
     registrar_auditoria(session, "usuario", usuario["sub"], "feedback", "chamado", id)
+    session.refresh(fb)
     return fb
 
 

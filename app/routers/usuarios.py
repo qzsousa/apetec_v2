@@ -107,6 +107,7 @@ def atualizar_dados_usuario(dados: UsuarioUpdate, cpf: str, session: Session = D
     session.commit()
     session.refresh(usuario)
     registrar_auditoria(session, "usuario" if usuario_atual.get("sub") == cpf else "secretaria", usuario_atual.get("sub"), "atualizar_usuario", "usuario", cpf)
+    session.refresh(usuario)
     return UsuarioPublic(**usuario.model_dump(exclude={"senha"}))
 
 
