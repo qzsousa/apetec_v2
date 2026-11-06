@@ -211,7 +211,7 @@
     msg.style.display = 'none';
 
     const body = {
-      cpf:          document.getElementById('input-cpf').value.trim(),
+      cpf:          document.getElementById('input-cpf').value.replace(/\D/g, ''),
       nome:         document.getElementById('input-nome').value.trim(),
       telefone:     document.getElementById('input-telefone').value.trim(),
       email:        document.getElementById('input-email').value.trim(),

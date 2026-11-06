@@ -6,6 +6,7 @@ from app.database import get_session
 from sqlmodel import Session, select
 from app.auth import hash_senha, get_usuario_atual, is_secretaria
 from app.audit import registrar_auditoria
+from app.cpf import cpf_valido, normalizar_cpf
 import os, uuid, hashlib
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
@@ -18,10 +19,6 @@ def senha_valida(senha: str) -> bool:
         bool(re.search(r'[0-9]', senha)) and
         bool(re.search(r'[!@#$%^&*(),.?":{}|<>]', senha))
     )
-
-
-def cpf_valido(cpf: str) -> bool:
-    return bool(re.fullmatch(r'\d{11}', cpf))
 
 
 @router.get("/")
@@ -48,6 +45,7 @@ def meu_perfil(session: Session = Depends(get_session), usuario_atual: dict = De
 
 @router.get("/{cpf}")
 def buscar_usuario(cpf: str, session: Session = Depends(get_session), usuario_atual: dict = Depends(get_usuario_atual)):
+    cpf = normalizar_cpf(cpf)
     if not (is_secretaria(usuario_atual) or usuario_atual.get("sub") == cpf):
         raise HTTPException(status_code=403, detail="Usuário sem permissão")
     usuario = session.get(Usuario, cpf)
@@ -58,8 +56,9 @@ def buscar_usuario(cpf: str, session: Session = Depends(get_session), usuario_at
 
 @router.post("/", status_code=201)
 def cadastrar_usuario(usuario: UsuarioCreate, session: Session = Depends(get_session)):
+    usuario.cpf = normalizar_cpf(usuario.cpf)
     if not cpf_valido(usuario.cpf):
-        raise HTTPException(status_code=400, detail="CPF inválido (11 dígitos)")
+        raise HTTPException(status_code=400, detail="CPF inválido")
     if session.get(Usuario, usuario.cpf):
         raise HTTPException(status_code=400, detail="CPF já cadastrado")
     if not senha_valida(usuario.senha):
@@ -89,11 +88,13 @@ def cadastrar_usuario(usuario: UsuarioCreate, session: Session = Depends(get_ses
         pass
 
     registrar_auditoria(session, "usuario", usuario.cpf, "cadastrar_usuario", "usuario", usuario.cpf)
+    session.refresh(db_usuario)
     return UsuarioPublic(**db_usuario.model_dump(exclude={"senha"}))
 
 
 @router.put("/{cpf}")
 def atualizar_dados_usuario(dados: UsuarioUpdate, cpf: str, session: Session = Depends(get_session), usuario_atual: dict = Depends(get_usuario_atual)):
+    cpf = normalizar_cpf(cpf)
     if not (is_secretaria(usuario_atual) or usuario_atual.get("sub") == cpf):
         raise HTTPException(status_code=403, detail="Usuário sem permissão")
     usuario = session.get(Usuario, cpf)
@@ -111,6 +112,7 @@ def atualizar_dados_usuario(dados: UsuarioUpdate, cpf: str, session: Session = D
 
 @router.delete("/{cpf}", status_code=204)
 def deletar_usuario(cpf: str, session: Session = Depends(get_session), usuario_atual: dict = Depends(get_usuario_atual)):
+    cpf = normalizar_cpf(cpf)
     if not (is_secretaria(usuario_atual) or usuario_atual.get("sub") == cpf):
         raise HTTPException(status_code=403, detail="Usuário sem permissão")
     usuario = session.get(Usuario, cpf)

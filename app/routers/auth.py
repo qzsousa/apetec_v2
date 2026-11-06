@@ -9,6 +9,7 @@ from sqlmodel import Session, select
 from app.database import get_session
 from app.models import LoginUsuario, LoginSecretaria, ResetarSenha, TokenRecuperacao, Usuario, Secretaria, SolicitarRecuperacao, VerificarCodigo, Notificacao
 from app.auth import verificar_senha, criar_token, hash_senha
+from app.cpf import normalizar_cpf
 
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
@@ -20,6 +21,7 @@ def _hash_codigo(codigo: str) -> str:
 
 @router.post("/login/usuario")
 def login_usuario(login_data: LoginUsuario, session: Session = Depends(get_session)):
+    login_data.cpf = normalizar_cpf(login_data.cpf)
     usuario = session.get(Usuario, login_data.cpf)
     if not usuario or not verificar_senha(login_data.senha, usuario.senha):
         raise HTTPException(status_code=401, detail="Credenciais inválidas")
@@ -29,6 +31,7 @@ def login_usuario(login_data: LoginUsuario, session: Session = Depends(get_sessi
 
 @router.post("/login/secretaria")
 def login_secretaria(login_data: LoginSecretaria, session: Session = Depends(get_session)):
+    login_data.cpf = normalizar_cpf(login_data.cpf)
     secretaria = session.get(Secretaria, login_data.cpf)
     if not secretaria or not verificar_senha(login_data.senha, secretaria.senha):
         raise HTTPException(status_code=401, detail="Credenciais inválidas")
