@@ -62,7 +62,7 @@ def listar_chamados(
 ):
     stmt = select(Chamado)
     if not is_secretaria(usuario):
-        stmt = stmt.where(Chamado.cpf_usuario_usuario == int(usuario["sub"]) if str(usuario["sub"]).isdigit() else Chamado.cpf_usuario_usuario == usuario["sub"])
+        stmt = stmt.where(Chamado.cpf_usuario_usuario == str(usuario["sub"]))
     if status:
         stmt = stmt.where(Chamado.status == status)
     if tipo:
