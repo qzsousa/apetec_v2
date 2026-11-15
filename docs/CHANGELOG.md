@@ -1,82 +1,68 @@
-# Atualizações e Novidades — Apetec
+# O que mudou no Apetec
 
-Documento com as funcionalidades recentemente adicionadas/atualizadas, acompanhadas de capturas de tela.
+Aqui estão as novidades e melhorias que foram adicionadas ao sistema, com imagens de cada parte.
 
-## 1. Matching automático e notificações
-- Score de compatibilidade entre chamados e itens (tipo, cor, marca, local, data).
-- Notificações por e-mail e in-app ao aluno quando item compatível é cadastrado.
-- Sugestões de itens no modal de ações da secretaria.
+## 1. Encontrar itens automaticamente
+O sistema agora compara chamados e itens encontrados por tipo, cor, marca, local e data. Quando um item compatível é cadastrado, o aluno recebe um e-mail e uma notificação no sistema.
 
-![Modal de Ações](../screenshots/modal_padronizado.png)
+![Ações da secretaria](../screenshots/modal_padronizado.png)
 
-## 2. Vínculo e entrega com código de retirada
-- Secretaria vincula item ao chamado; gera código de 6 dígitos.
-- Entrega exige código de retirada + confirmação de identidade.
-- Notificação ao aluno quando item pronto para retirada.
+## 2. Vincular e entregar com código
+A secretaria vincula o item ao chamado e gera um código de 6 números. Para retirar, o aluno apresenta esse código. A entrega só é concluída após confirmar a identidade.
 
-![Chat/Modal](../screenshots/chat_padronizado.png)
+![Chat e modal](../screenshots/chat_padronizado.png)
 
-## 3. Chat por chamado
-- Conversa aluno ↔ secretaria vinculada ao chamado.
-- Notificação in-app ao receber mensagem.
+## 3. Conversa (chat)
+Aluno e secretaria podem trocar mensagens dentro do chamado. Há notificação quando uma nova mensagem chega.
 
-![Chat padronizado](../screenshots/chat_padronizado.png)
+![Chat](../screenshots/chat_padronizado.png)
 
-## 4. Catálogo de itens para alunos
-- Alunos visualizam itens encontrados disponíveis.
-- Reivindicação de item ("É meu") cria chamado vinculado e notifica secretaria.
-- Filtros por tipo/cor.
+## 4. Itens encontrados para alunos
+Os alunos veem os itens que a secretaria cadastrou e podem dizer "é meu". Isso cria um chamado e avisa a secretaria.
 
-![Itens Encontrados](../screenshots/itens_encontrados.png)
+![Itens encontrados](../screenshots/itens_encontrados.png)
 
-## 5. Notificações in-app
-- Lista de notificações do usuário.
-- Marcar como lida.
+## 5. Notificações
+Lista de avisos para o aluno, com opção de marcar como lido.
 
 ![Notificações](../screenshots/notificacoes.png)
 
-## 6. Relatórios e métricas (secretaria)
-- Total de itens, disponíveis, entregues, doados, taxa de devolução.
-- Chamados por status, itens não reclamados (+30 dias).
-- Exportação CSV (itens e chamados).
-- Expiração/doação de itens (+90 dias).
+## 6. Relatórios para a secretaria
+Mostra números: quantos itens, entregues, doados, taxa de devolução, chamados por status e itens esquecidos há mais de 30 dias. Também permite baixar planilhas (CSV) e marcar itens antigos como doados.
 
 ![Relatórios](../screenshots/secretaria_relatorios.png)
 
-## 7. Auditoria
-- Registro de ações (criar item, chamado, vínculo, entrega, feedback, etc.) com ator e timestamp.
-- Endpoint `/secretaria/auditoria`.
+## 7. Histórico (auditoria)
+Registra quem fez o quê e quando (cadastro, vínculo, entrega, etc.).
 
-## 8. Feedback pós-entrega
-- Aluno avalia atendimento (nota 1–5 + comentário) após entrega.
+## 8. Avaliação após entrega
+O aluno pode dar nota e comentário sobre o atendimento.
 
-![Meus Chamados](../screenshots/meus_chamados.png)
+![Meus chamados](../screenshots/meus_chamados.png)
 
-## 9. Etiquetas/QR para objetos
-- Geração de QR code com dados do aluno para colar em objetos.
+## 9. Etiqueta com QR Code
+O aluno gera um QR code com seus dados para colar nos objetos, facilitando a identificação se perder.
 
-![Perfil + QR](../screenshots/perfil_qr.png)
+![Perfil com QR](../screenshots/perfil_qr.png)
 
-## 10. Confirmação de e-mail e validação de CPF
-- Cadastro exige CPF válido (11 dígitos).
-- E-mail de confirmação enviado no cadastro.
+## 10. Confirmação de e-mail
+No cadastro, o CPF é validado e um e-mail de confirmação é enviado.
 
-## 11. Padronização visual dos modais
-- Modais de ações, chat e confirmações alinhados ao tema (fundo marrom, acento amarelo, blur, Crimson Pro).
+## 11. Visual dos modais
+As janelas de ações, chat e confirmações ficaram com o mesmo estilo do sistema (fundo marrom, detalhes amarelos).
 
-![Modal Padronizado](../screenshots/modal_padronizado.png)
-![Aluno Padronizado](../screenshots/aluno_padronizado.png)
+![Modal padronizado](../screenshots/modal_padronizado.png)
+![Tela do aluno](../screenshots/aluno_padronizado.png)
 
-## 12. Upload de fotos
-- Foto no item encontrado e no chamado (até 5MB, png/jpg/jpeg/webp/gif).
+## 12. Fotos
+Itens e chamados podem ter fotos (até 5MB).
 
-## 13. Paginação e filtros avançados
-- skip/limit e filtros por tipo, cor, local, status nas listagens.
+## 13. Busca e filtros
+É possível filtrar por tipo, cor, local e status nas listas.
 
 ## 14. Documentação
-- README reestruturado.
-- Pasta `docs/` com arquitetura, API, funcionalidades e screenshots.
+README reorganizado e pasta de documentação com explicações simples.
 
 ---
 
-Screenshots completos em `screenshots/`.
+Todas as imagens estão na pasta `screenshots/`.
