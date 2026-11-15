@@ -1646,3 +1646,48 @@ input[type="file"]::file-selector-button:hover {
   margin-top: 12px;
   flex-wrap: wrap;
 }
+
+/* ===== RESPONSIVIDADE MOBILE ===== */
+@media (max-width: 768px) {
+  body { font-size: 16px; }
+  .login-container, .register-container, .card, .dash-card { padding: 24px 18px; width: 94vw; max-width: 94vw; }
+  .dash-header { padding: 10px 12px; flex-wrap: wrap; gap: 6px; }
+  .dash-logo { font-size: 16px; }
+  .dash-nome { font-size: 13px; }
+  .btn-perfil, .btn-logout { font-size: 16px; padding: 4px 8px; }
+  .dash-tabs { top: 52px; }
+  .tab-btn { min-width: 90px; padding: 10px 12px; font-size: 14px; }
+  .dash-main { margin-top: 100px; padding: 16px 12px 32px; }
+  .dash-section { max-width: 100%; }
+  .dash-card { padding: 20px 16px; }
+  .card-titulo { font-size: 18px; }
+  .card-sub { font-size: 13px; margin-bottom: 16px; }
+  .dash-card .form-grupo input,
+  .dash-card .form-grupo select,
+  .busca-input { font-size: 16px; padding: 10px 12px; }
+  .btn-primario, .btn-secundario, .Entrar, .Registrar, .Cadastrar, .Voltar { font-size: 15px; padding: 10px 14px; }
+  .dash-card .btns { grid-template-columns: 1fr; gap: 8px; }
+  .busca-row { flex-direction: column; gap: 8px; }
+  .chamado-item { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px; }
+  .chamado-info { width: 100%; }
+  .perfil-campo { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .perfil-valor { text-align: left; font-size: 15px; }
+  .modal-card { max-width: 95vw; padding: 16px; max-height: 90vh; }
+  .modal-chat-lista { min-height: 160px; }
+  .modal-actions { flex-direction: column; gap: 6px; }
+  .modal-actions button { width: 100%; }
+  .legenda-status { gap: 6px; }
+  .badge { font-size: 11px; padding: 3px 8px; }
+  input, select, textarea { font-size: 16px; }
+  .rodape { font-size: 12px; padding: 12px; }
+  img { max-width: 100%; height: auto; }
+}
+
+@media (max-width: 480px) {
+  .login-container, .register-container, .card, .dash-card { padding: 20px 14px; }
+  .typewriter-wrap { font-size: 22px; }
+  .dash-logo { font-size: 14px; }
+  .tab-btn { min-width: 80px; padding: 8px 10px; font-size: 13px; }
+  .card-titulo { font-size: 17px; }
+  .dash-header { padding: 8px 10px; }
+}
