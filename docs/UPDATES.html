@@ -1,0 +1,97 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  body { font-family: 'Crimson Pro', serif; background: #570000; color: #fff; padding: 32px; }
+  h1 { color: #f0c31f; }
+  h2 { color: #f0c31f; margin-top: 24px; }
+  a { color: #f0c31f; }
+  img { max-width: 100%; border-radius: 12px; margin: 12px 0; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  code { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid rgba(255,255,255,0.2); padding: 8px; }
+  th { background: rgba(240,195,31,0.15); color: #f0c31f; }
+</style>
+</head><body><h1 id="atualizacoes-e-novidades-apetec">Atualizações e Novidades — Apetec</h1>
+<p>Documento com as funcionalidades recentemente adicionadas/atualizadas, acompanhadas de capturas de tela.</p>
+<h2 id="1-matching-automatico-e-notificacoes">1. Matching automático e notificações</h2>
+<ul>
+<li>Score de compatibilidade entre chamados e itens (tipo, cor, marca, local, data).</li>
+<li>Notificações por e-mail e in-app ao aluno quando item compatível é cadastrado.</li>
+<li>Sugestões de itens no modal de ações da secretaria.</li>
+</ul>
+<p><img alt="Modal de Ações" src="../screenshots/modal_padronizado.png" /></p>
+<h2 id="2-vinculo-e-entrega-com-codigo-de-retirada">2. Vínculo e entrega com código de retirada</h2>
+<ul>
+<li>Secretaria vincula item ao chamado; gera código de 6 dígitos.</li>
+<li>Entrega exige código de retirada + confirmação de identidade.</li>
+<li>Notificação ao aluno quando item pronto para retirada.</li>
+</ul>
+<p><img alt="Chat/Modal" src="../screenshots/chat_padronizado.png" /></p>
+<h2 id="3-chat-por-chamado">3. Chat por chamado</h2>
+<ul>
+<li>Conversa aluno ↔ secretaria vinculada ao chamado.</li>
+<li>Notificação in-app ao receber mensagem.</li>
+</ul>
+<p><img alt="Chat padronizado" src="../screenshots/chat_padronizado.png" /></p>
+<h2 id="4-catalogo-de-itens-para-alunos">4. Catálogo de itens para alunos</h2>
+<ul>
+<li>Alunos visualizam itens encontrados disponíveis.</li>
+<li>Reivindicação de item ("É meu") cria chamado vinculado e notifica secretaria.</li>
+<li>Filtros por tipo/cor.</li>
+</ul>
+<p><img alt="Itens Encontrados" src="../screenshots/itens_encontrados.png" /></p>
+<h2 id="5-notificacoes-in-app">5. Notificações in-app</h2>
+<ul>
+<li>Lista de notificações do usuário.</li>
+<li>Marcar como lida.</li>
+</ul>
+<p><img alt="Notificações" src="../screenshots/notificacoes.png" /></p>
+<h2 id="6-relatorios-e-metricas-secretaria">6. Relatórios e métricas (secretaria)</h2>
+<ul>
+<li>Total de itens, disponíveis, entregues, doados, taxa de devolução.</li>
+<li>Chamados por status, itens não reclamados (+30 dias).</li>
+<li>Exportação CSV (itens e chamados).</li>
+<li>Expiração/doação de itens (+90 dias).</li>
+</ul>
+<p><img alt="Relatórios" src="../screenshots/secretaria_relatorios.png" /></p>
+<h2 id="7-auditoria">7. Auditoria</h2>
+<ul>
+<li>Registro de ações (criar item, chamado, vínculo, entrega, feedback, etc.) com ator e timestamp.</li>
+<li>Endpoint <code>/secretaria/auditoria</code>.</li>
+</ul>
+<h2 id="8-feedback-pos-entrega">8. Feedback pós-entrega</h2>
+<ul>
+<li>Aluno avalia atendimento (nota 1–5 + comentário) após entrega.</li>
+</ul>
+<p><img alt="Meus Chamados" src="../screenshots/meus_chamados.png" /></p>
+<h2 id="9-etiquetasqr-para-objetos">9. Etiquetas/QR para objetos</h2>
+<ul>
+<li>Geração de QR code com dados do aluno para colar em objetos.</li>
+</ul>
+<p><img alt="Perfil + QR" src="../screenshots/perfil_qr.png" /></p>
+<h2 id="10-confirmacao-de-e-mail-e-validacao-de-cpf">10. Confirmação de e-mail e validação de CPF</h2>
+<ul>
+<li>Cadastro exige CPF válido (11 dígitos).</li>
+<li>E-mail de confirmação enviado no cadastro.</li>
+</ul>
+<h2 id="11-padronizacao-visual-dos-modais">11. Padronização visual dos modais</h2>
+<ul>
+<li>Modais de ações, chat e confirmações alinhados ao tema (fundo marrom, acento amarelo, blur, Crimson Pro).</li>
+</ul>
+<p><img alt="Modal Padronizado" src="../screenshots/modal_padronizado.png" />
+<img alt="Aluno Padronizado" src="../screenshots/aluno_padronizado.png" /></p>
+<h2 id="12-upload-de-fotos">12. Upload de fotos</h2>
+<ul>
+<li>Foto no item encontrado e no chamado (até 5MB, png/jpg/jpeg/webp/gif).</li>
+</ul>
+<h2 id="13-paginacao-e-filtros-avancados">13. Paginação e filtros avançados</h2>
+<ul>
+<li>skip/limit e filtros por tipo, cor, local, status nas listagens.</li>
+</ul>
+<h2 id="14-documentacao">14. Documentação</h2>
+<ul>
+<li>README reestruturado.</li>
+<li>Pasta <code>docs/</code> com arquitetura, API, funcionalidades e screenshots.</li>
+</ul>
+<hr />
+<p>Screenshots completos em <code>screenshots/</code>.</p></body></html>
