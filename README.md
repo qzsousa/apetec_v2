@@ -12,6 +12,7 @@ API RESTful + frontend desenvolvido como TCC para substituir o sistema manual (p
 - [Fluxos principais](#fluxos-principais)
 - [Screenshots](#screenshots)
 - [Documentação detalhada](#documentação-detalhada)
+- [Atualizações recentes](docs/CHANGELOG.md)
 
 ## Visão geral
 O Apetec conecta alunos que perderam objetos à secretaria que encontra e cadastra itens. O fluxo cobre desde a abertura de chamado pelo aluno, passando pelo matching automático com itens encontrados, notificações, chat, reivindicação, entrega com código de retirada, até relatórios e auditoria.
