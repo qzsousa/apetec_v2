@@ -188,6 +188,8 @@ def reivindicar_item(id: int, session: Session = Depends(get_session), usuario: 
     item = session.get(Item, id)
     if not item or item.status != ItemStatusEnum.disponivel:
         raise HTTPException(status_code=404, detail="Item não disponível")
+    import random
+    codigo = str(random.randint(100000, 999999))
     chamado = Chamado(
         tipo=item.tipo,
         cor=item.cor,
@@ -195,13 +197,20 @@ def reivindicar_item(id: int, session: Session = Depends(get_session), usuario: 
         criterio_validacao="reivindicado pelo aluno",
         data_perda=item.data_entrada or date.today(),
         local_perda=item.local_encontrado,
-        status=ChamadoStatusEnum.em_aberto,
+        status=ChamadoStatusEnum.respondido,
         cpf_usuario_usuario=usuario["sub"],
         id_item=item.id,
+        codigo_retirada=codigo,
+        data_resposta=datetime.utcnow(),
+        notificado=False,
     )
     session.add(chamado)
     session.commit()
     session.refresh(chamado)
+
+    # notificar aluno com codigo de retirada
+    notif_aluno = Notificacao(cpf_usuario=usuario["sub"], tipo="respondido", mensagem=f"Seu item foi encontrado! Código de retirada: {codigo}")
+    session.add(notif_aluno)
 
     # notificar secretaria
     try:

@@ -96,6 +96,11 @@
   </div>
 </div>
 
+  <div class="form-grupo">
+    <label for="input-confirmar-senha">Confirmar senha</label>
+    <input type="password" id="input-confirmar-senha" placeholder="••••••••" oninput="verificarSenha()">
+  </div>
+
   <div class="msg" id="msg"></div>
 
   <div class="btns">
@@ -217,7 +222,8 @@
       email:        document.getElementById('input-email').value.trim(),
       turma_modulo: document.getElementById('input-turma').value.trim(),
       cargo:        document.getElementById('input-cargo').value,
-      senha:        document.getElementById('input-senha').value
+      senha:        document.getElementById('input-senha').value,
+      confirmar_senha: document.getElementById('input-confirmar-senha').value
     };
 
     if (!body.cpf || !body.nome || !body.telefone || !body.email || !body.turma_modulo || !body.cargo || !body.senha) {
@@ -234,6 +240,10 @@
     }
     if (!senhaValida(body.senha)) {
       mostrarMensagem('A senha nao atende aos requisitos minimos.', 'erro');
+      return;
+    }
+    if (body.senha !== body.confirmar_senha) {
+      mostrarMensagem('As senhas nao coincidem.', 'erro');
       return;
     }
 

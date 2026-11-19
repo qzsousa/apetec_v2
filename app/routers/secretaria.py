@@ -35,9 +35,22 @@ def relatorio(session: Session = Depends(get_session), usuario_atual: dict = Dep
     entregues = sum(1 for i in itens if i.status == ItemStatusEnum.entregue)
     doados = sum(1 for i in itens if i.status == ItemStatusEnum.doado)
 
-    por_status = {}
+    por_status = {s.value: 0 for s in ChamadoStatusEnum}
     for c in chamados:
         por_status[c.status.value] = por_status.get(c.status.value, 0) + 1
+
+    chamados_com_item = [c for c in chamados if c.id_item is not None]
+    cruzamentos = []
+    for c in chamados_com_item:
+        item = session.get(Item, c.id_item)
+        cruzamentos.append({
+            "chamado_id": c.id,
+            "status": c.status.value,
+            "item_id": c.id_item,
+            "item_tipo": item.tipo if item else None,
+            "item_marca": item.marca if item else None,
+            "item_cor": item.cor if item else None,
+        })
 
     limite = date.today() - timedelta(days=30)
     nao_reclamados = [i for i in itens if i.status == ItemStatusEnum.disponivel and i.data_entrada and i.data_entrada < limite]
@@ -51,7 +64,16 @@ def relatorio(session: Session = Depends(get_session), usuario_atual: dict = Dep
         "doados": doados,
         "taxa_devolucao": round(taxa, 2),
         "chamados_por_status": por_status,
+        "chamados_em_aberto": por_status.get(ChamadoStatusEnum.em_aberto.value, 0),
+        "chamados_respondidos": por_status.get(ChamadoStatusEnum.respondido.value, 0),
+        "chamados_finalizados": por_status.get(ChamadoStatusEnum.finalizado.value, 0),
         "total_chamados": len(chamados),
+        "chamados_com_item": len(chamados_com_item),
+        "chamados_sem_item": len(chamados) - len(chamados_com_item),
+        "cruzamentos": cruzamentos,
+        "cruzamento": cruzamentos,
+        "cruzamento_de_itens": cruzamentos,
+        "itens_cruzados": cruzamentos,
         "itens_nao_reclamados_30d": [{"id": i.id, "tipo": i.tipo, "marca": i.marca, "cor": i.cor, "data_entrada": str(i.data_entrada), "local": i.local_encontrado} for i in nao_reclamados],
     }
 

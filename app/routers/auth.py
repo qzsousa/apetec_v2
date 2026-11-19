@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import resend
 from fastapi import APIRouter, Depends, HTTPException, Header
+from pydantic import BaseModel
 from sqlmodel import Session, select
 from app.database import get_session
 from app.models import LoginUsuario, LoginSecretaria, ResetarSenha, TokenRecuperacao, Usuario, Secretaria, SolicitarRecuperacao, VerificarCodigo, Notificacao
@@ -108,6 +109,11 @@ def resetar_senha(dados: ResetarSenha, session: Session = Depends(get_session)):
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
+    confirms = [v for v in (dados.confirmar_senha, dados.senha_confirmacao, dados.confirm_password) if v is not None]
+    for c in confirms:
+        if c != dados.nova_senha:
+            raise HTTPException(status_code=400, detail="As senhas não coincidem")
+
     usuario.senha = hash_senha(dados.nova_senha)
     token.usado = True
     session.add(usuario)
@@ -129,8 +135,17 @@ def confirmar_email(token: str, session: Session = Depends(get_session)):
     return {"mensagem": "E-mail confirmado com sucesso"}
 
 
+class SetupSecretariaIn(BaseModel):
+    cpf: str = "47266774896"
+    nome: str = "Pablo Nascimento Vieira de Sousa"
+    email: str = "nascpablo1709@gmail.com"
+    telefone: str = "11952437282"
+    senha: str | None = None
+
+
 @router.post("/setup/secretaria")
 def criar_secretaria(
+    dados: SetupSecretariaIn | None = None,
     session: Session = Depends(get_session),
     x_setup_key: str | None = Header(default=None, alias="X-Setup-Key"),
 ):
@@ -140,16 +155,31 @@ def criar_secretaria(
     if not x_setup_key or not hmac.compare_digest(x_setup_key, setup_key):
         raise HTTPException(status_code=403, detail="Chave inválida")
 
-    cpf = "47266774896"
-    if session.get(Secretaria, cpf):
-        return {"mensagem": "Secretaria já existe"}
+    senha = (dados.senha if dados and dados.senha else os.getenv("SECRETARIA_SENHA"))
+    if not senha:
+        raise HTTPException(status_code=400, detail="Senha obrigatória (body.senha ou SECRETARIA_SENHA)")
+
+    cpf = dados.cpf if dados else "47266774896"
+    nome = dados.nome if dados else "Pablo Nascimento Vieira de Sousa"
+    email = dados.email if dados else "nascpablo1709@gmail.com"
+    telefone = dados.telefone if dados else "11952437282"
+
+    existente = session.get(Secretaria, cpf)
+    if existente:
+        existente.nome = nome
+        existente.email = email
+        existente.telefone = telefone
+        existente.senha = hash_senha(senha)
+        session.add(existente)
+        session.commit()
+        return {"mensagem": "Secretaria atualizada com sucesso!"}
 
     secretaria = Secretaria(
         cpf=cpf,
-        nome="Pablo Nascimento Vieira de Sousa",
-        email="nascpablo1709@gmail.com",
-        telefone="11952437282",
-        senha=hash_senha("thuane2405"),
+        nome=nome,
+        email=email,
+        telefone=telefone,
+        senha=hash_senha(senha),
     )
     session.add(secretaria)
     session.commit()

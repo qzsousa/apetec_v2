@@ -104,6 +104,9 @@ class UsuarioCreate(SQLModel):
     turma_modulo: str
     cargo: CargoEnum
     senha: str
+    confirmar_senha: Optional[str] = None
+    senha_confirmacao: Optional[str] = None
+    confirm_password: Optional[str] = None
 
 
 class TokenRecuperacao(SQLModel, table=True):
@@ -120,6 +123,9 @@ class UsuarioUpdate(SQLModel):
     email: Optional[str] = None
     turma_modulo: Optional[str] = None
     senha: Optional[str] = None
+    confirmar_senha: Optional[str] = None
+    senha_confirmacao: Optional[str] = None
+    confirm_password: Optional[str] = None
 
 
 class ItemUpdate(SQLModel):
@@ -176,6 +182,9 @@ class ResetarSenha(SQLModel):
     email: str
     codigo: str
     nova_senha: str
+    confirmar_senha: Optional[str] = None
+    senha_confirmacao: Optional[str] = None
+    confirm_password: Optional[str] = None
 
 
 class UsuarioPublic(SQLModel):

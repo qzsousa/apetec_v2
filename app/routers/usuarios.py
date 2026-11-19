@@ -61,9 +61,13 @@ def cadastrar_usuario(usuario: UsuarioCreate, session: Session = Depends(get_ses
         raise HTTPException(status_code=400, detail="CPF inválido")
     if session.get(Usuario, usuario.cpf):
         raise HTTPException(status_code=400, detail="CPF já cadastrado")
+    confirms = [v for v in (usuario.confirmar_senha, usuario.senha_confirmacao, usuario.confirm_password) if v is not None]
+    for c in confirms:
+        if c != usuario.senha:
+            raise HTTPException(status_code=400, detail="As senhas não coincidem")
     if not senha_valida(usuario.senha):
         raise HTTPException(status_code=400, detail="A senha não atende aos requisitos mínimos")
-    db_usuario = Usuario(**usuario.model_dump())
+    db_usuario = Usuario(**usuario.model_dump(exclude={"confirmar_senha", "senha_confirmacao", "confirm_password"}))
     db_usuario.senha = hash_senha(db_usuario.senha)
     token = uuid.uuid4().hex
     db_usuario.token_confirmacao = token
@@ -72,6 +76,7 @@ def cadastrar_usuario(usuario: UsuarioCreate, session: Session = Depends(get_ses
     session.commit()
     session.refresh(db_usuario)
 
+    app_url = os.getenv("APP_URL", "https://apetec-v2.onrender.com").rstrip("/")
     # enviar email de confirmacao
     try:
         api_key = os.getenv("RESEND_API_KEY")
@@ -82,7 +87,7 @@ def cadastrar_usuario(usuario: UsuarioCreate, session: Session = Depends(get_ses
                 "from": "onboarding@resend.dev",
                 "to": db_usuario.email,
                 "subject": "Confirme seu e-mail - Apetec",
-                "html": f"<p>Olá {db_usuario.nome},</p><p>Clique no link para confirmar seu e-mail:</p><p><a href='http://localhost:8000/auth/confirmar-email?token={token}'>Confirmar e-mail</a></p>",
+                "html": f"<p>Olá {db_usuario.nome},</p><p>Clique no link para confirmar seu e-mail:</p><p><a href='{app_url}/auth/confirmar-email?token={token}'>Confirmar e-mail</a></p>",
             })
     except Exception:
         pass
@@ -101,8 +106,14 @@ def atualizar_dados_usuario(dados: UsuarioUpdate, cpf: str, session: Session = D
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     if dados.senha:
+        confirms = [v for v in (dados.confirmar_senha, dados.senha_confirmacao, dados.confirm_password) if v is not None]
+        for c in confirms:
+            if c != dados.senha:
+                raise HTTPException(status_code=400, detail="As senhas não coincidem")
+        if not senha_valida(dados.senha):
+            raise HTTPException(status_code=400, detail="A senha não atende aos requisitos mínimos")
         dados.senha = hash_senha(dados.senha)
-    dados_novos = dados.model_dump(exclude_unset=True)
+    dados_novos = dados.model_dump(exclude_unset=True, exclude={"confirmar_senha", "senha_confirmacao", "confirm_password"})
     usuario.sqlmodel_update(dados_novos)
     session.commit()
     session.refresh(usuario)

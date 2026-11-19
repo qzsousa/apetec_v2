@@ -9,3 +9,15 @@ services:
         sync: false
       - key: RESEND_API_KEY
         sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_BUCKET
+        sync: false
+      - key: SETUP_KEY
+        sync: false
+      - key: SECRETARIA_SENHA
+        sync: false
+      - key: APP_URL
+        sync: false

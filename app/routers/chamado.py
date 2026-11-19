@@ -107,6 +107,12 @@ def atualizar_chamado(dados: ChamadoUpdate, id: int, session: Session = Depends(
     chamado = session.get(Chamado, id)
     if not chamado:
         raise HTTPException(status_code=404, detail="Chamado não encontrado")
+    if dados.status == ChamadoStatusEnum.finalizado:
+        new_item_id = dados.id_item if dados.id_item is not None else chamado.id_item
+        if not new_item_id:
+            raise HTTPException(status_code=400, detail="Chamado só pode ser finalizado com um item vinculado ao estoque")
+        if not session.get(Item, new_item_id):
+            raise HTTPException(status_code=404, detail="Item não encontrado")
     chamado.sqlmodel_update(dados.model_dump(exclude_unset=True))
     session.commit()
     session.refresh(chamado)

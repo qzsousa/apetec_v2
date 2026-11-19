@@ -71,6 +71,23 @@ async function chamarAPI(url, metodo = "GET", body = null) {
     return res;
 }
 
+async function exportarCSV(url, filename) {
+  try {
+    const res = await chamarAPI(url, 'GET');
+    if (!res.ok) { alert('Erro ao exportar CSV.'); return; }
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename || 'export.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  } catch (e) {
+    alert('Erro ao exportar CSV.');
+  }
+}
+
 function escapeHtml(valor) {
     if (valor === null || valor === undefined) return "";
     return String(valor)
